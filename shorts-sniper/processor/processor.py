@@ -1,17 +1,21 @@
 from typing import List, Dict, Any
-from pytube import YouTube, Channel
-import scrapetube
+from pytube import YouTube, Playlist
 from youtube_transcript_api import YouTubeTranscriptApi
 from mongodb.mongodb import MongoDBClient
 
+def get_playlist_video_urls(playlist_url):
+    playlist = Playlist(playlist_url)
 
-def process_videos_by_channel_url(channel_url: str) -> None:
+    video_urls = list(playlist.url_generator())
+    return video_urls
+
+
+def process_videos_by_video_urls(video_urls: [str]) -> None:
     try:
-        video_urls: List[str] = get_channel_video_urls(channel_url)
         for url in video_urls:
             process_single_video(url)
     except Exception as e:
-        print(f"Error processing channel {channel_url}: {str(e)}")
+        print(f"Error on process_videos_by_channel_url: {str(e)}")
 
 
 def process_single_video(video_url: str) -> None:
@@ -38,21 +42,6 @@ def process_single_video(video_url: str) -> None:
         print(f"Error processing video {video_url}: {str(e)}")
 
 
-def get_channel_video_urls(channel_url: str) -> List[str]:
-    videos = scrapetube.get_playlist("PLWieWKZeFoVRmUNn9KA2dVpQswo19QkwQ")
-
-    video_urls = list(
-        map(
-            lambda video: f"https://www.youtube.com{video['navigationEndpoint']['commandMetadata']['webCommandMetadata']['url']}",
-            videos,
-        )
-    )
-
-    print(len(video_urls))
-
-    return []
-
-
 def extract_video_data_by_video_url(video_url: str) -> Dict[str, Dict[str, Any]]:
     try:
         youtube_video: YouTube = YouTube(video_url)
@@ -75,6 +64,3 @@ def extract_video_data_by_video_url(video_url: str) -> Dict[str, Dict[str, Any]]
     except Exception as e:
         print(f"Error extracting data for video {video_url}: {str(e)}")
 
-
-if __name__ == "__main__":
-    process_videos_by_channel_url("your_channel_url")
