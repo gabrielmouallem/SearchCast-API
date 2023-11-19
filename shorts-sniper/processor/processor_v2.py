@@ -1,7 +1,12 @@
-from typing import List, Dict, Any
+from typing import Dict, Any
 from pytube import YouTube, Playlist
 from youtube_transcript_api import YouTubeTranscriptApi
 from mongodb.mongodb import MongoDBClient
+
+def generate_unique_id(my_dict):
+    # Concatenate relevant attributes
+    concatenated_string = f"{my_dict['text']}_{my_dict['start']}_{my_dict['duration']}_{my_dict['videoId']}"
+    return concatenated_string
 
 def get_playlist_video_urls(playlist_url):
     playlist = Playlist(playlist_url)
@@ -35,13 +40,14 @@ def process_single_video(video_url: str) -> None:
         mongo_client_for_video_data: MongoDBClient = MongoDBClient(
             collection_name="videoTranscriptionsV2"
         )
+                
+        transcripts: [dict] = video_data["transcript"]['transcript']
         
-        transcripts: [dict] = video_data["transcript"]["transcript"]
-
         # Loop over each transcript and insert it into the collection
         for transcript_entry in transcripts:
+            id = generate_unique_id(transcript_entry)
             mongo_client_for_video_data.insert_document(
-                document={transcript_entry},
+                document=transcript_entry, document_id=id
             )
     except Exception as e:
         print(f"Error processing video {video_url}: {str(e)}")
@@ -56,9 +62,11 @@ def extract_video_data_by_video_url(video_url: str) -> Dict[str, Dict[str, Any]]
             [video_id], languages=["pt", "en"]
         )
 
+        transcript_array = transcript[0][video_id]
+        
         # Iterate over transcript items and add "videoId" key to each dictionary
         modified_transcript = [
-            {**item, "videoId": video_id} for item in transcript[0][video_id]
+            {**item, "videoId": video_id} for item in transcript_array
         ]
 
         return {
