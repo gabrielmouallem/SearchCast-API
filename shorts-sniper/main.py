@@ -9,18 +9,23 @@ from processor.processor_v2 import get_playlist_video_urls, process_videos_by_vi
 # main.py
 def main():
     load_dotenv()
+
+    all_urls = []  # Create an empty list to store all URLs
     
     urls = get_playlist_video_urls("https://www.youtube.com/watch?v=Cko3pI9ulo4&list=PLWieWKZeFoVSLVo0Bn5UdlUdsuz21CXcF")
-    process_videos_by_video_urls(urls)
-    
+    all_urls.extend(urls)  # Append URLs to the list
+
     urls = get_playlist_video_urls("https://www.youtube.com/watch?v=gXfVH25EbJ8&list=PLWieWKZeFoVRmUNn9KA2dVpQswo19QkwQ")
-    process_videos_by_video_urls(urls)
-    
+    all_urls.extend(urls)  # Append URLs to the list
+
     urls = get_playlist_video_urls("https://www.youtube.com/watch?v=_UFCNsVBVtA&list=PLaE_mZALZ0V2E0lVJowee_oerd3OMvyJu")
-    process_videos_by_video_urls(urls)
-    
+    all_urls.extend(urls)  # Append URLs to the list
+
     urls = get_playlist_video_urls("https://www.youtube.com/watch?v=eG5GrTqyGBQ&list=PLJznpI7w9TooV0ORuL9e4ZRYMznV_Dwdp")
-    process_videos_by_video_urls(urls)
+    all_urls.extend(urls)  # Append URLs to the list
+
+    # Now, 'all_urls' contains all the concatenated URLs
+    process_videos_by_video_urls(all_urls)
 
 
 if __name__ == "__main__":

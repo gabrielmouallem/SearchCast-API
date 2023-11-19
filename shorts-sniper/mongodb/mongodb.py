@@ -21,8 +21,6 @@ class MongoDBClient:
         if self.database_name not in self.client.list_database_names():
             self.client[self.database_name]  # type: Database
             print(f"Database '{self.database_name}' created.")
-        else:
-            print(f"Database '{self.database_name}' already exists. Skipping creation.")
 
     def _create_collection_if_not_exists(self) -> None:
         """Create the collection if it does not exist."""
@@ -32,10 +30,6 @@ class MongoDBClient:
         ):
             self.client[self.database_name][self.collection_name]  # type: Collection
             print(f"Collection '{self.collection_name}' created.")
-        else:
-            print(
-                f"Collection '{self.collection_name}' already exists. Skipping creation."
-            )
 
         self.collection: Collection = self.client[self.database_name][
             self.collection_name
