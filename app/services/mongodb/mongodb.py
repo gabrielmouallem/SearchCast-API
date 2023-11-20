@@ -1,10 +1,11 @@
+# mongodb.py
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.results import UpdateResult, DeleteResult
 from typing import Dict, Any, Optional
 
 
-class MongoDBClient:
+class MongoDBClientService:
     def __init__(
         self,
         database_name: str = "shortsSniper",
