@@ -1,8 +1,8 @@
 from typing import Dict, Any
-from pytube import YouTube, Playlist
+from pytube import YouTube, Playlist, Channel
 from youtube_transcript_api import YouTubeTranscriptApi
-from utils import generate_unique_id
-from mongodb.mongodb import MongoDBClientService
+from utils import generate_unique_id, extract_video_id
+from services.mongodb import MongoDBClientService
 import time
 
 
@@ -11,11 +11,26 @@ class VideoProcessingService:
         self.transcriptions_collection = "videoData"
         self.video_transcriptions_collection = "videoTranscriptions"
 
+    def get_channel_video_urls(self, channel_url: str):
+        channel = Channel(channel_url)
+
+        video_urls = list(channel.url_generator())
+        return video_urls
+
+    def process_by_channel_url(self, channel_url: str):
+        video_urls = self.get_channel_video_urls(channel_url=channel_url)
+        print(video_urls)
+        self.process_by_video_urls(video_urls=video_urls)
+
     def get_playlist_video_urls(self, playlist_url: str):
         playlist = Playlist(playlist_url)
 
         video_urls = list(playlist.url_generator())
         return video_urls
+
+    def process_by_playlist_url(self, playlist_url: str):
+        video_urls = self.get_playlist_video_urls(playlist_url=playlist_url)
+        self.process_by_video_urls(video_urls=video_urls)
 
     def process_by_video_urls(self, video_urls: [str]) -> None:
         total_videos = len(video_urls)
@@ -23,7 +38,10 @@ class VideoProcessingService:
         start_time = time.time()
 
         for url in video_urls:
-            self.process_single_video(url)
+            is_processed = self._check_if_video_is_already_processed(url)
+            print(f"Video {url} already processed")
+            if is_processed is False:
+                self.process_single_video(url)
             video_processed_count += 1
             self._print_progress(video_processed_count, total_videos, start_time)
 
@@ -40,7 +58,7 @@ class VideoProcessingService:
             self._save_transcripts_to_mongo(
                 transcripts, self.video_transcriptions_collection
             )
-
+            print(f"Video {video_url} processed")
         except Exception as e:
             print(f"Error processing video {video_url}: {str(e)}")
 
@@ -73,6 +91,17 @@ class VideoProcessingService:
 
         except Exception as e:
             print(f"Error extracting data for video {video_url}: {str(e)}")
+
+    def _check_if_video_is_already_processed(self, video_url: str):
+        mongo_client = MongoDBClientService(collection_name="videoData")
+        video_id = extract_video_id(video_url)
+        if video_id is None:
+            return False
+        video = mongo_client.find_document(video_id)
+        if video is None:
+            return False
+        else:
+            return True
 
     def _save_video_data_to_mongo(
         self, document: Dict[str, Any], document_id: str, collection_name: str
