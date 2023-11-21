@@ -1,69 +1,16 @@
 # routes.py
 from flask import jsonify, request
 from pymongo import MongoClient
+from typing import List, Any
 
 client = MongoClient("mongodb://localhost:27017")
 db = client.shortsSniper
 
-"""
 
-videoTranscriptions collection data format:
-
-{
-  "_id": "cc94950c52b5d7be6c6201db62a7190a",
-  "text": "estamos começando mais um flor eu sou",
-  "start": 30.96,
-  "duration": 4.56,
-  "videoId": "Cko3pI9ulo4" --> This videoId is the _id of the videoData collection
-}
-
-videoData collection data format:
-
-{
-  "_id": "Cko3pI9ulo4",
-  "videoId": "Cko3pI9ulo4",
-  "title": "POPÓ - Flow Podcast #544 🤝 @FlowSportClub",
-  "lengthSeconds": "9567",
-  "channelId": "UC4ncvgh5hFr5O83MH7-jRJg",
-  "isOwnerViewing": false,
-  "isCrawlable": true,
-  "thumbnail": {
-    "thumbnails": [
-      {
-        "url": "https://i.ytimg.com/vi/Cko3pI9ulo4/mqdefault.jpg?v=61fc67ad",
-        "width": 320,
-        "height": 180
-      },
-      {
-        "url": "https://i.ytimg.com/vi/Cko3pI9ulo4/hqdefault.jpg?sqp=-oaymwEXCJADEOABSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLAM4U1DnJJiofKfPE8T-I8zqsoDSA",
-        "width": 400,
-        "height": 224
-      },
-      {
-        "url": "https://i.ytimg.com/vi/Cko3pI9ulo4/hq720.jpg?sqp=-oaymwEXCKAGEMIDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLCkOyE2gIVVRtnXVLYl3Zs8KPKmEA",
-        "width": 800,
-        "height": 450
-      },
-      {
-        "url": "https://i.ytimg.com/vi/Cko3pI9ulo4/hq720.jpg?v=61fc67ad",
-        "width": 1280,
-        "height": 720
-      }
-    ]
-  },
-  "allowRatings": true,
-  "viewCount": "1369209",
-  "author": "Flow Podcast 1.0 - Episódios Completos",
-  "isLowLatencyLiveStream": false,
-  "isPrivate": false,
-  "isUnpluggedCorpus": false,
-  "latencyClass": "MDE_STREAM_OPTIMIZATIONS_RENDERER_LATENCY_NORMAL",
-  "musicVideoType": "MUSIC_VIDEO_TYPE_PODCAST_EPISODE",
-  "isLiveContent": true,
-  "watchUrl": "https://youtube.com/watch?v=Cko3pI9ulo4"
-}
-
-"""
+def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
+    start_index = (page - 1) * per_page
+    end_index = start_index + per_page
+    return items[start_index:end_index]
 
 
 def configure_routes(app):
@@ -80,6 +27,8 @@ def configure_routes(app):
     @app.route("/search", methods=["GET"])
     def search_transcriptions():
         query_text = request.args.get("text", "")
+        page: int = request.args.get("page", 1, type=int)
+        per_page: int = request.args.get("per_page", 10, type=int)
 
         # Perform case-insensitive regex search on the 'text' field
         regex_query = {"text": {"$regex": f".*{query_text}.*", "$options": "i"}}
@@ -102,4 +51,6 @@ def configure_routes(app):
         # Execute the aggregation pipeline
         aggregated_data = list(db.videoTranscriptions.aggregate(aggregation_pipeline))
 
-        return jsonify(aggregated_data)
+        paginated_data: List[Any] = paginate(aggregated_data, page, per_page)
+
+        return jsonify(paginated_data)
