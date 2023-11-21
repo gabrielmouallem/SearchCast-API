@@ -53,6 +53,10 @@ def configure_routes(app):
 
         paginated_data: List[Any] = paginate(aggregated_data, page, per_page)
 
-        response_data = {"page": page, "results": paginated_data}
+        response_data = {
+            "page": page,
+            "results": paginated_data,
+            "count": len(aggregated_data),
+        }
 
         return jsonify(response_data)
