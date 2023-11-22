@@ -2,6 +2,7 @@
 from flask import jsonify, request
 from services.mongodb import db
 from typing import List, Any
+import re
 
 
 def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
@@ -67,12 +68,22 @@ def configure_routes(app):
         # Execute the aggregation pipeline
         aggregated_data = list(db.videoTranscriptions.aggregate(aggregation_pipeline))
 
-        paginated_data: List[Any] = paginate(aggregated_data, page, per_page)
+        # Filter aggregated_data based on the words in query_text to have all the words included on the final result
+        filtered_data = [
+            item
+            for item in aggregated_data
+            if all(
+                word.lower() in item["transcription"]["text"].lower()
+                for word in re.findall(r"\w+", query_text)
+            )
+        ]
+
+        paginated_data: List[Any] = paginate(filtered_data, page, per_page)
 
         response_data = {
             "page": page,
             "results": paginated_data,
-            "count": len(aggregated_data),
+            "count": len(filtered_data),
         }
 
         return jsonify(response_data)
