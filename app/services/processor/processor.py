@@ -19,8 +19,11 @@ class VideoProcessingService:
 
     def process_by_channel_url(self, channel_url: str):
         video_urls = self.get_channel_video_urls(channel_url=channel_url)
-        print(video_urls)
         self.process_by_video_urls(video_urls=video_urls)
+
+    def process_by_playlist_urls(self, playlist_urls: [str]):
+        for playlist_url in playlist_urls:
+            self.process_by_playlist_url(playlist_url=playlist_url)
 
     def get_playlist_video_urls(self, playlist_url: str):
         playlist = Playlist(playlist_url)
@@ -39,7 +42,7 @@ class VideoProcessingService:
 
         for url in video_urls:
             is_processed = self._check_if_video_is_already_processed(url)
-            print(f"Video {url} already processed")
+            # print(f"Video {url} already processed")
             if is_processed is False:
                 self.process_single_video(url)
             video_processed_count += 1
@@ -58,9 +61,10 @@ class VideoProcessingService:
             self._save_transcripts_to_mongo(
                 transcripts, self.video_transcriptions_collection
             )
-            print(f"Video {video_url} processed")
+            # print(f"Video {video_url} processed")
         except Exception as e:
-            print(f"Error processing video {video_url}: {str(e)}")
+            pass
+            # print(f"Error processing video {video_url}: {str(e)}")
 
     def extract_video_data_by_video_url(
         self, video_url: str
@@ -90,7 +94,8 @@ class VideoProcessingService:
             }
 
         except Exception as e:
-            print(f"Error extracting data for video {video_url}: {str(e)}")
+            pass
+            # print(f"Error extracting data for video {video_url}: {str(e)}")
 
     def _check_if_video_is_already_processed(self, video_url: str):
         mongo_client = MongoDBClientService(collection_name="videoData")

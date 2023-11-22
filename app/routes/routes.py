@@ -1,10 +1,7 @@
 # routes.py
 from flask import jsonify, request
-from pymongo import MongoClient
+from services.mongodb import db
 from typing import List, Any
-
-client = MongoClient("mongodb://localhost:27017")
-db = client.shortsSniper
 
 
 def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
@@ -29,13 +26,32 @@ def configure_routes(app):
         query_text = request.args.get("text", "")
         page: int = request.args.get("page", 1, type=int)
         per_page: int = request.args.get("per_page", 10, type=int)
+        case_sensitive_str: str = request.args.get("caseSensitive", "false")
+        exact_text_str: str = request.args.get("exactText", "false")
 
-        # Perform case-insensitive regex search on the 'text' field
-        regex_query = {"text": {"$regex": f".*{query_text}.*", "$options": "i"}}
+        # Convert caseSensitive and exactText to boolean values
+        case_sensitive: bool = case_sensitive_str.lower() == "true"
+        exact_text: bool = exact_text_str.lower() == "true"
+
+        # Create the text search query
+        text_search_query = {"$text": {"$search": query_text}}
+
+        # Modify the text search query based on case sensitivity
+        if not case_sensitive:
+            text_search_query["$text"]["$caseSensitive"] = False
+
+        # If exactText is True, use an exact match query
+        if exact_text:
+            exact_text_query = {"text": query_text}
+        else:
+            exact_text_query = {}
+
+        # Combine the text search query and the exact text query
+        combined_query = {"$and": [text_search_query, exact_text_query]}
 
         # Aggregation pipeline to join videoData with matching videoTranscriptions
         aggregation_pipeline = [
-            {"$match": regex_query},
+            {"$match": combined_query},
             {
                 "$lookup": {
                     "from": "videoData",

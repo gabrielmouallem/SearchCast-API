@@ -4,6 +4,11 @@ from pymongo.collection import Collection
 from pymongo.results import UpdateResult, DeleteResult
 from typing import Dict, Any, Optional
 
+mongo_uri = "mongodb://127.0.0.1:27018/"
+
+client = MongoClient(mongo_uri)
+db = client.shortsSniper
+
 
 class MongoDBClientService:
     def __init__(
@@ -11,11 +16,12 @@ class MongoDBClientService:
         database_name: str = "shortsSniper",
         collection_name: str = "videoTranscriptions",
     ):
-        self.client: MongoClient = MongoClient()
+        self.client: MongoClient = MongoClient(mongo_uri)
         self.database_name: str = database_name
         self.collection_name: str = collection_name
         self._create_database_if_not_exists()
         self._create_collection_if_not_exists()
+        print(self.collection.index_information())
 
     def _create_database_if_not_exists(self) -> None:
         """Create the database if it does not exist."""
