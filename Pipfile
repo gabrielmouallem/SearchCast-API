@@ -15,6 +15,7 @@ distlib = "==0.3.7"
 dnspython = "==2.4.2"
 filelock = "==3.13.1"
 flask = "==3.0.0"
+flask-cors = "==4.0.0"
 flask-pymongo = "==2.3.0"
 idna = "==3.4"
 itsdangerous = "==2.1.2"
@@ -36,6 +37,7 @@ typing-extensions = "==4.8.0"
 urllib3 = "==2.1.0"
 virtualenv = "==20.24.6"
 werkzeug = "==3.0.1"
+youtube-dl = {ref = "00ef748cc0e35ee60efd0f7a00e373ab8d1af86b", git = "git+https://github.com/ytdl-org/youtube-dl.git"}
 youtube-transcript-api = "==0.6.1"
 
 [dev-packages]
