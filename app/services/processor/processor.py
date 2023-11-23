@@ -22,8 +22,12 @@ class VideoProcessingService:
         self.process_by_video_urls(video_urls=video_urls)
 
     def process_by_playlist_urls(self, playlist_urls: [str]):
+        video_urls = []
         for playlist_url in playlist_urls:
-            self.process_by_playlist_url(playlist_url=playlist_url)
+            video_urls = video_urls + self.get_playlist_video_urls(
+                playlist_url=playlist_url
+            )
+        self.process_by_video_urls(video_urls=video_urls)
 
     def get_playlist_video_urls(self, playlist_url: str):
         playlist = Playlist(playlist_url)
@@ -49,20 +53,22 @@ class VideoProcessingService:
             self._print_progress(video_processed_count, total_videos, start_time)
 
     def process_single_video(self, video_url: str) -> None:
-        video_data = self.extract_video_data_by_video_url(video_url)
-        video_id = video_data["infos"]["videoId"]
+        try:
+            video_data = self.extract_video_data_by_video_url(video_url)
+            video_id = video_data["infos"]["videoId"]
 
-        self._save_video_data_to_mongo(
-            video_data["infos"], video_id, self.transcriptions_collection
-        )
+            self._save_video_data_to_mongo(
+                video_data["infos"], video_id, self.transcriptions_collection
+            )
 
-        transcripts = video_data["transcript"]
-        self._save_transcripts_to_mongo(
-            transcripts, video_data["infos"], self.video_transcriptions_collection
-        )
-        # print(f"Video {video_url} processed")
-
-        # print(f"Error processing video {video_url}: {str(e)}")
+            transcripts = video_data["transcript"]
+            self._save_transcripts_to_mongo(
+                transcripts, video_data["infos"], self.video_transcriptions_collection
+            )
+            # print(f"Video {video_url} processed")
+        except Exception as e:
+            pass
+            # print(f"Error processing video {video_url}: {str(e)}")
 
     def extract_video_data_by_video_url(
         self, video_url: str
