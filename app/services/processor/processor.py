@@ -49,22 +49,20 @@ class VideoProcessingService:
             self._print_progress(video_processed_count, total_videos, start_time)
 
     def process_single_video(self, video_url: str) -> None:
-        try:
-            video_data = self.extract_video_data_by_video_url(video_url)
-            video_id = video_data["infos"]["videoId"]
+        video_data = self.extract_video_data_by_video_url(video_url)
+        video_id = video_data["infos"]["videoId"]
 
-            self._save_video_data_to_mongo(
-                video_data["infos"], video_id, self.transcriptions_collection
-            )
+        self._save_video_data_to_mongo(
+            video_data["infos"], video_id, self.transcriptions_collection
+        )
 
-            transcripts = video_data["transcript"]["transcript"]
-            self._save_transcripts_to_mongo(
-                transcripts, self.video_transcriptions_collection
-            )
-            # print(f"Video {video_url} processed")
-        except Exception as e:
-            pass
-            # print(f"Error processing video {video_url}: {str(e)}")
+        transcripts = video_data["transcript"]
+        self._save_transcripts_to_mongo(
+            transcripts, video_data["infos"], self.video_transcriptions_collection
+        )
+        # print(f"Video {video_url} processed")
+
+        # print(f"Error processing video {video_url}: {str(e)}")
 
     def extract_video_data_by_video_url(
         self, video_url: str
@@ -78,19 +76,14 @@ class VideoProcessingService:
             )
             transcript_array = transcript[0][video_id]
 
-            modified_transcript = [
-                {**item, "videoId": video_id} for item in transcript_array
-            ]
-
             return {
                 "infos": {
                     **youtube_video.vid_info["videoDetails"],
+                    "publishDate": youtube_video.publish_date,
                     "watchUrl": youtube_video.watch_url,
                     "videoId": video_id,
                 },
-                "transcript": {
-                    "transcript": modified_transcript,
-                },
+                "transcript": transcript_array,
             }
 
         except Exception as e:
@@ -115,12 +108,13 @@ class VideoProcessingService:
         mongo_client.insert_document(document=document, document_id=document_id)
 
     def _save_transcripts_to_mongo(
-        self, transcripts: [dict], collection_name: str
+        self, transcripts: [dict], video_data: dict, collection_name: str
     ) -> None:
         mongo_client = MongoDBClientService(collection_name=collection_name)
         for transcript_entry in transcripts:
-            id = generate_unique_id(transcript_entry)
-            mongo_client.insert_document(document=transcript_entry, document_id=id)
+            transcript_document = {**transcript_entry, "video": video_data}
+            id = generate_unique_id(transcript_document)
+            mongo_client.insert_document(document=transcript_document, document_id=id)
 
     def _print_progress(
         self, processed_count: int, total: int, start_time: float

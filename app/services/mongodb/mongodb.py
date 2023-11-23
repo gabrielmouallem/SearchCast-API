@@ -21,7 +21,6 @@ class MongoDBClientService:
         self.collection_name: str = collection_name
         self._create_database_if_not_exists()
         self._create_collection_if_not_exists()
-        print(self.collection.index_information())
 
     def _create_database_if_not_exists(self) -> None:
         """Create the database if it does not exist."""
