@@ -1,10 +1,11 @@
 # mongodb.py
+import os
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.results import UpdateResult, DeleteResult
 from typing import Dict, Any, Optional
 
-mongo_uri = "mongodb://127.0.0.1:27018/"
+mongo_uri = os.environ.get("DATABASE_URL")
 
 client = MongoClient(mongo_uri)
 db = client.shortsSniper

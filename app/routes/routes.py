@@ -12,16 +12,6 @@ def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
 
 
 def configure_routes(app):
-    @app.route("/videoData", methods=["GET"])
-    def get_all_video_data():
-        videoDatas = db.videoData.find()
-        return jsonify([data for data in videoDatas])
-
-    @app.route("/videoData/<int:id>", methods=["GET"])
-    def get_video_data_by_id(id):
-        videoData = db.videoData.find_one({"_id": id})
-        return videoData
-
     @app.route("/search", methods=["GET"])
     def search_transcriptions():
         try:
