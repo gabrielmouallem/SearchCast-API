@@ -1,5 +1,6 @@
 # mongodb.py
 import os
+import certifi
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo.collection import Collection
@@ -14,6 +15,7 @@ client = MongoClient(
     ssl=True,
     tls=True,
     tlsAllowInvalidCertificates=True,
+    tlsCAFile=certifi.where(),
 )
 db = client.shortsSniper
 
@@ -30,6 +32,7 @@ class MongoDBClientService:
             ssl=True,
             tls=True,
             tlsAllowInvalidCertificates=True,
+            tlsCAFile=certifi.where(),
         )
         try:
             client.admin.command("ping")
