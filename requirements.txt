@@ -32,3 +32,5 @@ urllib3==2.1.0
 virtualenv==20.24.7
 Werkzeug==3.0.1
 gunicorn
+Flask-PyMongo==2.3.0
+youtube-dl @ git+https://github.com/ytdl-org/youtube-dl.git@00ef748cc0e35ee60efd0f7a00e373ab8d1af86b
