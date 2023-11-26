@@ -1,31 +1,31 @@
 import os
-from pytube import YouTube
-
-
-def on_progress(stream, chunk, remaining):
-    total_size = stream.filesize
-    bytes_downloaded = total_size - remaining
-    percentage = (bytes_downloaded / total_size) * 100
-    print(f"Downloading... {percentage:.2f}% complete", end="\r")
+import youtube_dl
 
 
 def download(link):
     try:
-        youtube_object = YouTube(link, on_progress_callback=on_progress)
-        video_stream = youtube_object.streams.get_highest_resolution()
+        options = {
+            "outtmpl": os.path.join("videos", "%(title)s.%(ext)s"),
+            "progress_hooks": [on_progress],
+        }
 
-        # Create a 'videos' folder if it doesn't exist
-        if not os.path.exists("videos"):
-            os.makedirs("videos")
-
-        # Set the download path to the 'videos' folder with the original video name
-        download_path = os.path.join("videos", video_stream.default_filename)
-        video_stream.download(output_path=".", filename=download_path)
+        with youtube_dl.YoutubeDL(options) as ydl:
+            ydl.download([link])
 
         print("\nDownload is completed successfully")
 
     except Exception as e:
         print(f"\nAn error has occurred: {e}")
+
+
+def on_progress(d):
+    if d["status"] == "finished":
+        print("\nDownload completed successfully")
+    else:
+        total_size = d.get("total_bytes") or d.get("total_bytes_estimate", 0)
+        downloaded_bytes = d.get("downloaded_bytes", 0)
+        percentage = (downloaded_bytes / total_size) * 100
+        print(f"Downloading... {percentage:.2f}% complete", end="\r")
 
 
 if __name__ == "__main__":
