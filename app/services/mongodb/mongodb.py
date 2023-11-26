@@ -8,7 +8,13 @@ from typing import Dict, Any, Optional
 
 mongo_uri = os.environ.get("MONGO_URI")
 
-client = MongoClient(mongo_uri, server_api=ServerApi("1"), ssl=True)
+client = MongoClient(
+    mongo_uri,
+    server_api=ServerApi("1"),
+    ssl=True,
+    tls=True,
+    tlsAllowInvalidCertificates=True,
+)
 db = client.shortsSniper
 
 
@@ -18,7 +24,13 @@ class MongoDBClientService:
         database_name: str = "shortsSniper",
         collection_name: str = "videoTranscriptions",
     ):
-        self.client: MongoClient = MongoClient(mongo_uri, server_api=ServerApi("1"))
+        self.client: MongoClient = MongoClient(
+            mongo_uri,
+            server_api=ServerApi("1"),
+            ssl=True,
+            tls=True,
+            tlsAllowInvalidCertificates=True,
+        )
         try:
             client.admin.command("ping")
             print("Pinged your deployment. You successfully connected to MongoDB!")
