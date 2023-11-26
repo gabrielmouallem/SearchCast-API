@@ -1,5 +1,6 @@
 # mongodb.py
 import os
+import ssl
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo.collection import Collection
@@ -8,7 +9,9 @@ from typing import Dict, Any, Optional
 
 mongo_uri = os.environ.get("MONGO_URI")
 
-client = MongoClient(mongo_uri, server_api=ServerApi("1"))
+client = MongoClient(
+    mongo_uri, server_api=ServerApi("1"), ssl=True, ssl_cert_reqs=ssl.CERT_NONE
+)
 db = client.shortsSniper
 
 
