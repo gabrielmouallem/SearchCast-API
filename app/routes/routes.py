@@ -1,8 +1,11 @@
 # routes.py
+import os
 from flask import Response, jsonify, request
 from services.mongodb import db
 from typing import List, Any
 import re
+
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 
 def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
@@ -11,8 +14,26 @@ def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
     return items[start_index:end_index]
 
 
+def authenticate(api_key):
+    """Function to authenticate users based on the provided API key."""
+    return api_key == SECRET_KEY
+
+
+def requires_auth(f):
+    """Decorator function to protect routes with authentication."""
+
+    def decorated(*args, **kwargs):
+        api_key = request.headers.get("Api-Key")
+        if not api_key or not authenticate(api_key):
+            return jsonify({"error": "Unauthorized"}), 401
+        return f(*args, **kwargs)
+
+    return decorated
+
+
 def configure_routes(app):
     @app.route("/search", methods=["GET"])
+    @requires_auth
     def search_transcriptions():
         try:
             query_text = request.args.get("text", "")
@@ -66,7 +87,7 @@ def configure_routes(app):
 
         except Exception as e:
             return Response(
-                jsonify({"error": "Internal Server Error", "message": str(e)}),
+                response=str(e),
                 status=500,
                 mimetype="application/json",
             )

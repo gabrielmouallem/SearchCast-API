@@ -5,7 +5,7 @@ from pymongo.collection import Collection
 from pymongo.results import UpdateResult, DeleteResult
 from typing import Dict, Any, Optional
 
-mongo_uri = os.environ.get("DATABASE_URL")
+mongo_uri = os.environ.get("MONGO_URI")
 
 client = MongoClient(mongo_uri)
 db = client.shortsSniper
