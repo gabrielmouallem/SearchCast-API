@@ -12,10 +12,6 @@ mongo_uri = os.environ.get("MONGO_URI")
 client = MongoClient(
     mongo_uri,
     server_api=ServerApi("1"),
-    ssl=True,
-    tls=True,
-    tlsAllowInvalidCertificates=True,
-    tlsCAFile=certifi.where(),
 )
 db = client.shortsSniper
 
@@ -29,10 +25,6 @@ class MongoDBClientService:
         self.client: MongoClient = MongoClient(
             mongo_uri,
             server_api=ServerApi("1"),
-            ssl=True,
-            tls=True,
-            tlsAllowInvalidCertificates=True,
-            tlsCAFile=certifi.where(),
         )
         try:
             client.admin.command("ping")
