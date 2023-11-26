@@ -32,6 +32,10 @@ def requires_auth(f):
 
 
 def configure_routes(app):
+    @app.route("/health", methods=["GET"])
+    def search_transcriptions():
+        return jsonify({"message": "Server is online!"})
+
     @app.route("/search", methods=["GET"])
     @requires_auth
     def search_transcriptions():
