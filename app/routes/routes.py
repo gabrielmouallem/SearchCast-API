@@ -25,4 +25,4 @@ def configure_routes(app):
 
         search = SearchDTO(query_text, page, per_page, case_sensitive, exact_text)
 
-        return SearchController.search_transcriptions(search)
+        return SearchController().search_transcriptions(search=search)

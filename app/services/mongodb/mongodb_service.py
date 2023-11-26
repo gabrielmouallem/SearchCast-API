@@ -1,6 +1,5 @@
 # mongodb.py
 import os
-import certifi
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo.collection import Collection

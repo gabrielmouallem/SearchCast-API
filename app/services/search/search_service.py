@@ -5,7 +5,7 @@ from app.repositories.transcription_repository import TranscriptionRepository
 
 class SearchService:
     def search_transcriptions(self, query):
-        return TranscriptionRepository.search_transcriptions(query)
+        return TranscriptionRepository().search_transcriptions(query=query)
 
     def filter_data(self, result_data, query_text):
         return [

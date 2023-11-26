@@ -8,7 +8,7 @@ from app.utils.utils import paginate
 
 class SearchController:
     def __init__(self):
-        self.search_service = SearchService
+        self.search_service = SearchService()
 
     def search_transcriptions(self, search: SearchDTO):
         try:
@@ -28,7 +28,7 @@ class SearchController:
             # Combine the text search query and the exact text query
             combined_query = {"$and": [text_search_query, exact_text_query]}
 
-            result_data = self.search_service.search_transcriptions(combined_query)
+            result_data = self.search_service.search_transcriptions(query=combined_query)
 
             filtered_data = self.search_service.filter_data(
                 result_data, search.query_text
