@@ -1,5 +1,11 @@
 import hashlib
 import re
+from typing import Any, List
+
+def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
+    start_index = (page - 1) * per_page
+    end_index = start_index + per_page
+    return items[start_index:end_index]
 
 
 def generate_unique_id(my_dict):
