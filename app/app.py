@@ -1,5 +1,5 @@
 from flask import Flask
-from routes import configure_routes
+from app.routes import configure_routes
 from flask_cors import CORS
 
 app = Flask(__name__)
