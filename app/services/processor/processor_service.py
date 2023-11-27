@@ -21,18 +21,22 @@ class VideoProcessingService:
         video_urls = self.get_channel_video_urls(channel_url=channel_url)
         self.process_by_video_urls(video_urls=video_urls)
 
-    def process_by_playlist_urls(self, playlist_urls: [str]):
+    def process_by_playlist_urls(
+        self, playlist_urls: [str], max_videos_per_channel: int
+    ):
         video_urls = []
         for playlist_url in playlist_urls:
             video_urls = video_urls + self.get_playlist_video_urls(
-                playlist_url=playlist_url
+                playlist_url=playlist_url, max_urls=max_videos_per_channel
             )
         self.process_by_video_urls(video_urls=video_urls)
 
-    def get_playlist_video_urls(self, playlist_url: str):
+    def get_playlist_video_urls(self, playlist_url: str, max_urls: int):
         playlist = Playlist(playlist_url)
 
         video_urls = list(playlist.url_generator())
+        if max_urls:
+            return video_urls[:max_urls]
         return video_urls
 
     def process_by_playlist_url(self, playlist_url: str):

@@ -1,4 +1,4 @@
-from services.processor import VideoProcessingService
+from services.processor.processor_service import VideoProcessingService
 
 playlist_urls = [
     "https://www.youtube.com/watch?v=qlmUwgTy97M&list=PLWieWKZeFoVQQzBATfDAmHaLgA3Sf5p0O&pp=iAQB",
@@ -36,7 +36,9 @@ playlist_urls = [
 
 # def start(url: str):
 def start():
-    VideoProcessingService().process_by_playlist_urls(playlist_urls=playlist_urls)
+    VideoProcessingService().process_by_playlist_urls(
+        playlist_urls=playlist_urls, max_videos_per_channel=10
+    )
 
 
 # link = input("Enter the YouTube playlist URL: ")
