@@ -1,11 +1,20 @@
+from datetime import datetime
 import re
 
 from app.repositories.transcription_repository import TranscriptionRepository
 
+def get_publish_date(item):
+    return item['video']['publishDate']
 
 class SearchService:
     def search_transcriptions(self, query):
         return TranscriptionRepository().search_transcriptions(query=query)
+    
+    def sort_data(self, result_data):
+        try:
+            return sorted(result_data, key=get_publish_date, reverse=True)
+        except:
+            return result_data
 
     def filter_data(self, result_data, query_text):
         return [
