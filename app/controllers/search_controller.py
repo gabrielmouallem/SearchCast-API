@@ -28,7 +28,13 @@ class SearchController:
             # Combine the text search query and the exact text query
             combined_query = {"$and": [text_search_query, exact_text_query]}
 
-            result_data = self.search_service.search_transcriptions(query=combined_query)
+            # Add $sort stage to sort by video.publishDate in descending order
+            sort_stage = {"$sort": {"video.publishDate": -1}}
+
+            # Perform the search and sort using the aggregation pipeline
+            result_data = self.search_service.search_transcriptions(
+                query=[{"$match": combined_query}, sort_stage]
+            )
 
             filtered_data = self.search_service.filter_data(
                 result_data, search.query_text
