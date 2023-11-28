@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
-from config.setup import setup
+from config import setup
 from routes import configure_routes
 
 env = setup()

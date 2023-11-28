@@ -10,7 +10,8 @@ def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
 
 def generate_unique_id(my_dict):
     # Concatenate relevant attributes
-    concatenated_string = f"{my_dict['text']}_{my_dict['start']}_{my_dict['duration']}_{my_dict["video"]['videoId']}"
+    video = my_dict["video"]
+    concatenated_string = f"{my_dict['text']}_{my_dict['start']}_{my_dict['duration']}_{video['videoId']}"
 
     # Hash the concatenated string
     hashed_value = hashlib.md5(concatenated_string.encode()).hexdigest()
