@@ -1,11 +1,14 @@
 from flask import Flask
-from app.routes.routes import configure_routes
 from flask_cors import CORS
+from config.setup import setup
+from routes import configure_routes
+
+env = setup()
 
 app = Flask(__name__)
-app.config["DEBUG"] = True
-CORS(app)
+app.config.from_object(f"config.{env}.{env.capitalize()}Config")
 
+CORS(app)
 configure_routes(app)
 
 if __name__ == "__main__":

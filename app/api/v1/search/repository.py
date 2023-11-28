@@ -1,7 +1,7 @@
-from app.services.mongodb.mongodb_service import db
+from api.common.services.mongodb import db
 
 
-class TranscriptionRepository:
+class SearchRepository:
     def __init__(self):
         self.db = db
 

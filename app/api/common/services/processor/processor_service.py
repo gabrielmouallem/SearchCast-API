@@ -1,13 +1,17 @@
+import os
 from typing import Dict, Any
 from pytube import YouTube, Playlist, Channel
 from youtube_transcript_api import YouTubeTranscriptApi
-from utils import generate_unique_id, extract_video_id
-from services.mongodb import MongoDBClientService
+from ....common.utils.utils import extract_video_id, generate_unique_id
+from ....common.services.mongodb.mongodb_service import MongoDBClientService
 import time
+
+mongo_uri = os.environ.get("MONGO_URI")
 
 
 class VideoProcessingService:
-    def __init__(self):
+    def __init__(self, mongo_uri: str = mongo_uri):
+        self.mongo_uri = mongo_uri
         self.transcriptions_collection = "videoData"
         self.video_transcriptions_collection = "videoTranscriptions"
 
@@ -98,10 +102,11 @@ class VideoProcessingService:
 
         except Exception as e:
             pass
-            # print(f"Error extracting data for video {video_url}: {str(e)}")
 
     def _check_if_video_is_already_processed(self, video_url: str):
-        mongo_client = MongoDBClientService(collection_name="videoData")
+        mongo_client = MongoDBClientService(
+            mongo_uri=self.mongo_uri, collection_name="videoData"
+        )
         video_id = extract_video_id(video_url)
         if video_id is None:
             return False
@@ -114,13 +119,17 @@ class VideoProcessingService:
     def _save_video_data_to_mongo(
         self, document: Dict[str, Any], document_id: str, collection_name: str
     ) -> None:
-        mongo_client = MongoDBClientService(collection_name=collection_name)
+        mongo_client = MongoDBClientService(
+            mongo_uri=self.mongo_uri, collection_name=collection_name
+        )
         mongo_client.insert_document(document=document, document_id=document_id)
 
     def _save_transcripts_to_mongo(
         self, transcripts: [dict], video_data: dict, collection_name: str
     ) -> None:
-        mongo_client = MongoDBClientService(collection_name=collection_name)
+        mongo_client = MongoDBClientService(
+            mongo_uri=self.mongo_uri, collection_name=collection_name
+        )
         for transcript_entry in transcripts:
             transcript_document = {**transcript_entry, "video": video_data}
             id = generate_unique_id(transcript_document)

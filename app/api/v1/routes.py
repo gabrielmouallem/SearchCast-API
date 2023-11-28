@@ -1,15 +1,11 @@
 # routes.py
-from flask import jsonify, request
-from app.controllers.search_controller import SearchController
-from app.decorators.requires_auth import requires_auth
-from app.dtos.search_dto import SearchDTO
+from flask import request
+from api.common.decorators import requires_auth
+from api.v1.search.dto import SearchDTO
+from api.v1.search.controller import SearchController
 
 
-def configure_routes(app):
-    @app.route("/health", methods=["GET"])
-    def health():
-        return jsonify({"message": "Server is online!"})
-
+def configure_v1_routes(app):
     @app.route("/v1/search", methods=["GET"])
     @requires_auth
     def search_transcriptions():

@@ -1,11 +1,11 @@
 import re
 
-from app.repositories.transcription_repository import TranscriptionRepository
+from app.repositories.transcription_repository import SearchRepository
 
 
 class SearchService:
     def search_transcriptions(self, query):
-        return TranscriptionRepository().search_transcriptions(query=query)
+        return SearchRepository().search_transcriptions(query=query)
 
     def filter_data(self, result_data, query_text):
         return [

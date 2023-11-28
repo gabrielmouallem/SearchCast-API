@@ -20,16 +20,12 @@ class MongoDBClientService:
         self,
         database_name: str = "shortsSniper",
         collection_name: str = "videoTranscriptions",
+        mongo_uri: str = mongo_uri,
     ):
         self.client: MongoClient = MongoClient(
             mongo_uri,
             server_api=ServerApi("1"),
         )
-        try:
-            client.admin.command("ping")
-            print("Pinged your deployment. You successfully connected to MongoDB!")
-        except Exception as e:
-            print(e)
         self.database_name: str = database_name
         self.collection_name: str = collection_name
         self._create_database_if_not_exists()

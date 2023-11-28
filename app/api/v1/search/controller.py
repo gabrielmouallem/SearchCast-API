@@ -1,9 +1,9 @@
 # controller/search_controller.py
 from flask import jsonify, Response
-from app.dtos.search_dto import SearchDTO
-from app.services.search.search_service import SearchService
+from .dto import SearchDTO
+from .service import SearchService
 
-from app.utils.utils import paginate
+from api.common.utils.utils import paginate
 
 
 class SearchController:
