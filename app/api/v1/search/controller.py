@@ -36,8 +36,10 @@ class SearchController:
             filtered_data = self.search_service.filter_data(
                 result_data, search.query_text
             )
+            
+            sorted_data = self.search_service.sort_data(filtered_data)
 
-            paginated_data = paginate(filtered_data, search.page, search.per_page)
+            paginated_data = paginate(sorted_data, search.page, search.per_page)
 
             response_data = {
                 "page": search.page,
