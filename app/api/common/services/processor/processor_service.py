@@ -53,10 +53,7 @@ class VideoProcessingService:
         start_time = time.time()
 
         for url in video_urls:
-            is_processed = self._check_if_video_is_already_processed(url)
-            # print(f"Video {url} already processed")
-            if is_processed is False:
-                self.process_single_video(url)
+            self.process_single_video(url)
             video_processed_count += 1
             self._print_progress(video_processed_count, total_videos, start_time)
 
@@ -65,14 +62,21 @@ class VideoProcessingService:
             video_data = self.extract_video_data_by_video_url(video_url)
             video_id = video_data["infos"]["videoId"]
 
-            self._save_video_data_to_mongo(
-                video_data["infos"], video_id, self.transcriptions_collection
-            )
+            is_processed = self._check_if_video_is_already_processed(video_id)
 
-            transcripts = video_data["transcript"]
-            self._save_transcripts_to_mongo(
-                transcripts, video_data["infos"], self.video_transcriptions_collection
-            )
+            if is_processed:
+                pass
+            else:
+                self._save_video_data_to_mongo(
+                    video_data["infos"], video_id, self.transcriptions_collection
+                )
+
+                transcripts = video_data["transcript"]
+                self._save_transcripts_to_mongo(
+                    transcripts,
+                    video_data["infos"],
+                    self.video_transcriptions_collection,
+                )
             # print(f"Video {video_url} processed")
         except Exception as e:
             pass
@@ -102,12 +106,12 @@ class VideoProcessingService:
 
         except Exception as e:
             pass
+            # print(str(e))
 
-    def _check_if_video_is_already_processed(self, video_url: str):
+    def _check_if_video_is_already_processed(self, video_id: str):
         mongo_client = MongoDBClientService(
             mongo_uri=self.mongo_uri, collection_name="videoData"
         )
-        video_id = extract_video_id(video_url)
         if video_id is None:
             return False
         video = mongo_client.find_document(video_id)
@@ -130,10 +134,21 @@ class VideoProcessingService:
         mongo_client = MongoDBClientService(
             mongo_uri=self.mongo_uri, collection_name=collection_name
         )
-        for transcript_entry in transcripts:
-            transcript_document = {**transcript_entry, "video": video_data}
-            id = generate_unique_id(transcript_document)
-            mongo_client.insert_document(document=transcript_document, document_id=id)
+
+        # Create a list of documents
+        documents_to_insert = [
+            {
+                **transcript_entry,
+                "video": video_data,
+                "_id": generate_unique_id({**transcript_entry, "video": video_data}),
+            }
+            for transcript_entry in transcripts
+        ]
+
+        # Use insert_many_documents to insert or update the documents
+        result_ids = mongo_client.insert_many_documents(documents_to_insert)
+
+        return result_ids
 
     def _print_progress(
         self, processed_count: int, total: int, start_time: float

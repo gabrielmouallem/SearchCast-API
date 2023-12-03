@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo.collection import Collection
 from pymongo.results import UpdateResult, DeleteResult
-from typing import Dict, Any, Optional
+from typing import Dict, Any, List, Optional
 
 mongo_uri = os.environ.get("MONGO_URI")
 
@@ -79,6 +79,13 @@ class MongoDBClientService:
         """Delete a document from the collection based on the document ID."""
         result: DeleteResult = self.collection.delete_one({"_id": document_id})
         return result.deleted_count
+
+    def insert_many_documents(
+        self, documents: List[Dict[str, Any]]
+    ) -> List[Optional[Any]]:
+        """Insert multiple documents into the collection."""
+        result = self.collection.insert_many(documents, ordered=False)
+        return result.inserted_ids
 
     def close_connection(self) -> None:
         """Close the MongoDB connection."""
