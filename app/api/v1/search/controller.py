@@ -1,4 +1,4 @@
-# controller/search_controller.py
+# controller.py
 from flask import jsonify, Response
 from .dto import SearchDTO
 from .service import SearchService
@@ -28,15 +28,19 @@ class SearchController:
             # Combine the text search query and the exact text query
             combined_query = {"$and": [text_search_query, exact_text_query]}
 
-            # Perform the search and sort using the aggregation pipeline
+            # Perform the search with pagination
             result_data = self.search_service.search_transcriptions(
+                query=combined_query, page=search.page, per_page=search.per_page
+            )
+
+            result_count = self.search_service.count_transcriptions(
                 query=combined_query
             )
 
             filtered_data = self.search_service.filter_data(
                 result_data, search.query_text
             )
-            
+
             sorted_data = self.search_service.sort_data(filtered_data)
 
             paginated_data = paginate(sorted_data, search.page, search.per_page)
@@ -44,7 +48,7 @@ class SearchController:
             response_data = {
                 "page": search.page,
                 "results": paginated_data,
-                "count": len(filtered_data),
+                "count": result_count,
             }
 
             return jsonify(response_data)
