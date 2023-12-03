@@ -3,7 +3,7 @@ from flask import jsonify, Response
 from .dto import SearchDTO
 from .service import SearchService
 
-from api.common.utils.utils import paginate
+from api.common.utils.utils import format_text_to_double_quotes
 
 
 class SearchController:
@@ -13,7 +13,9 @@ class SearchController:
     def search_transcriptions(self, search: SearchDTO):
         try:
             # Create the text search query
-            text_search_query = {"$text": {"$search": search.query_text}}
+            text_search_query = {
+                "$text": {"$search": format_text_to_double_quotes(search.query_text)}
+            }
 
             # Modify the text search query based on case sensitivity
             if not search.case_sensitive:
@@ -30,24 +32,18 @@ class SearchController:
 
             # Perform the search with pagination
             result_data = self.search_service.search_transcriptions(
-                query=combined_query, page=search.page, per_page=search.per_page
+                query=combined_query,
+                page=search.page,
+                per_page=search.per_page,
             )
 
             result_count = self.search_service.count_transcriptions(
                 query=combined_query
             )
 
-            filtered_data = self.search_service.filter_data(
-                result_data, search.query_text
-            )
-
-            sorted_data = self.search_service.sort_data(filtered_data)
-
-            paginated_data = paginate(sorted_data, search.page, search.per_page)
-
             response_data = {
                 "page": search.page,
-                "results": paginated_data,
+                "results": result_data,
                 "count": result_count,
             }
 

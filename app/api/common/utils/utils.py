@@ -2,16 +2,19 @@ import hashlib
 import re
 from typing import Any, List
 
-def paginate(items: List[Any], page: int, per_page: int) -> List[Any]:
-    start_index = (page - 1) * per_page
-    end_index = start_index + per_page
-    return items[start_index:end_index]
+
+def format_text_to_double_quotes(text: str):
+    words = text.split()
+    formatted_string = " ".join(['"{}"'.format(word) for word in words])
+    return formatted_string
 
 
 def generate_unique_id(my_dict):
     # Concatenate relevant attributes
     video = my_dict["video"]
-    concatenated_string = f"{my_dict['text']}_{my_dict['start']}_{my_dict['duration']}_{video['videoId']}"
+    concatenated_string = (
+        f"{my_dict['text']}_{my_dict['start']}_{my_dict['duration']}_{video['videoId']}"
+    )
 
     # Hash the concatenated string
     hashed_value = hashlib.md5(concatenated_string.encode()).hexdigest()

@@ -1,4 +1,5 @@
 # repository.py
+import pymongo
 from api.common.services.mongodb import db
 
 
@@ -12,7 +13,10 @@ class SearchRepository:
 
         # Execute the aggregation pipeline with pagination
         result_data = (
-            self.db.videoTranscriptions.find(query).skip(skip_count).limit(per_page)
+            self.db.videoTranscriptions.find(query)
+            .skip(skip_count)
+            .limit(per_page)
+            .sort("video.publishDate", pymongo.DESCENDING)
         )
 
         return list(result_data)
