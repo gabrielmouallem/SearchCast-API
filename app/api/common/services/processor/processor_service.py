@@ -2,7 +2,7 @@ import os
 from typing import Dict, Any
 from pytube import YouTube, Playlist, Channel
 from youtube_transcript_api import YouTubeTranscriptApi
-from ....common.utils.utils import extract_video_id, generate_unique_id
+from ....common.utils.utils import generate_unique_id
 from ....common.services.mongodb.mongodb_service import MongoDBClientService
 import time
 
