@@ -7,7 +7,7 @@ def setup():
 
     env = os.environ.get("FLASK_ENV", "development")
     print(f"\n * API env: {env.upper()}\n")
-    if env != "production":
+    if env != "deployment":
         dotenv_path = f".env.{env}"
         load_dotenv(dotenv_path=dotenv_path, verbose=True, override=True)
     return env
