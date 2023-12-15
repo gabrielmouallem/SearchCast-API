@@ -1,5 +1,4 @@
 # service.py
-import re
 from .repository import SearchRepository
 
 
