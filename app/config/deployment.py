@@ -1,5 +1,5 @@
 from .config import Config
 
 
-class DevelopmentConfig(Config):
+class DeploymentConfig(Config):
     DEBUG = False
