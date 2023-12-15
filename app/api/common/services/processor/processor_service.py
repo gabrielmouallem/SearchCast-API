@@ -1,4 +1,3 @@
-import os
 from typing import Dict, Any
 from pytube import YouTube, Playlist, Channel
 from youtube_transcript_api import YouTubeTranscriptApi
@@ -6,11 +5,9 @@ from ....common.utils.utils import generate_unique_id
 from ....common.services.mongodb.mongodb_service import MongoDBClientService
 import time
 
-mongo_uri = os.environ.get("MONGO_URI")
-
 
 class VideoProcessingService:
-    def __init__(self, mongo_uri: str = mongo_uri):
+    def __init__(self, mongo_uri: str):
         self.mongo_uri = mongo_uri
         self.transcriptions_collection = "videoData"
         self.video_transcriptions_collection = "videoTranscriptions"

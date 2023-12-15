@@ -1,26 +1,17 @@
 # mongodb.py
-import os
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo.collection import Collection
 from pymongo.results import UpdateResult, DeleteResult
 from typing import Dict, Any, List, Optional
 
-mongo_uri = os.environ.get("MONGO_URI")
-
-client = MongoClient(
-    mongo_uri,
-    server_api=ServerApi("1"),
-)
-db = client.shortsSniper
-
 
 class MongoDBClientService:
     def __init__(
         self,
+        mongo_uri: str,
         database_name: str = "shortsSniper",
         collection_name: str = "videoTranscriptions",
-        mongo_uri: str = mongo_uri,
     ):
         self.client: MongoClient = MongoClient(
             mongo_uri,
