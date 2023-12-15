@@ -1,11 +1,11 @@
 # repository.py
 import pymongo
-from api.common.services.mongodb import db
+from api.common.services.mongodb import get_db
 
 
 class SearchRepository:
     def __init__(self):
-        self.db = db
+        self.db = get_db()
 
     def search_transcriptions(self, query, page=1, per_page=10):
         # Calculate skip count based on pagination parameters

@@ -1,10 +1,5 @@
 # service.py
-import re
 from .repository import SearchRepository
-
-
-def get_publish_date(item):
-    return item["video"]["publishDate"]
 
 
 class SearchService:
