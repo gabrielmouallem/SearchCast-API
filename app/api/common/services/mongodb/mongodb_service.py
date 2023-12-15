@@ -1,9 +1,19 @@
 # mongodb.py
+import os
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from pymongo.collection import Collection
 from pymongo.results import UpdateResult, DeleteResult
 from typing import Dict, Any, List, Optional
+
+
+mongo_uri = os.environ.get("MONGO_URI")
+
+client = MongoClient(
+    mongo_uri,
+    server_api=ServerApi("1"),
+)
+db = client.shortsSniper
 
 
 class MongoDBClientService:
