@@ -7,13 +7,14 @@ from pymongo.results import UpdateResult, DeleteResult
 from typing import Dict, Any, List, Optional
 
 
-mongo_uri = os.environ.get("MONGO_URI")
+def get_db():
+    mongo_uri = os.environ.get("MONGO_URI")
 
-client = MongoClient(
-    mongo_uri,
-    server_api=ServerApi("1"),
-)
-db = client.shortsSniper
+    client = MongoClient(
+        mongo_uri,
+        server_api=ServerApi("1"),
+    )
+    return client.shortsSniper
 
 
 class MongoDBClientService:
