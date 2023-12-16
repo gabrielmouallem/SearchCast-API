@@ -28,3 +28,7 @@ jobs:
 
     - name: Run the cronjob
       run: python app/cron_video_processor.py
+      env:
+        FLASK_ENV: production
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
