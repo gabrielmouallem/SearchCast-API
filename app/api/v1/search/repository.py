@@ -14,9 +14,9 @@ class SearchRepository:
         # Execute the aggregation pipeline with pagination
         result_data = (
             self.db.videoTranscriptions.find(query)
+            .sort("video.publishDate", pymongo.DESCENDING)
             .skip(skip_count)
             .limit(per_page)
-            .sort("video.publishDate", pymongo.DESCENDING)
         )
 
         return list(result_data)
@@ -24,3 +24,6 @@ class SearchRepository:
     def count_transcriptions(self, query):
         # Execute a count query
         return self.db.videoTranscriptions.count_documents(query)
+
+    def aggregate_transcriptions(self, pipeline):
+        return list(self.db.videoTranscriptions.aggregate(pipeline))[0]

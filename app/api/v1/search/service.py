@@ -10,3 +10,6 @@ class SearchService:
 
     def count_transcriptions(self, query):
         return SearchRepository().count_transcriptions(query=query)
+
+    def aggregate_transcriptions(self, pipeline):
+        return SearchRepository().aggregate_transcriptions(pipeline=pipeline)
