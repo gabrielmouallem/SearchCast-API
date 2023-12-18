@@ -12,13 +12,18 @@ def configure_v1_routes(app):
         query_text = request.args.get("text", "")
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 10, type=int)
-        case_sensitive_str = request.args.get("caseSensitive", "false")
-        exact_text_str = request.args.get("exactText", "false")
 
-        # Convert caseSensitive and exactText to boolean values
-        case_sensitive = case_sensitive_str.lower() == "true"
-        exact_text = exact_text_str.lower() == "true"
-
-        search = SearchDTO(query_text, page, per_page, case_sensitive, exact_text)
+        search = SearchDTO(query_text, page, per_page)
 
         return SearchController().search_transcriptions(search=search)
+
+    @app.route("/v1/search_by_video", methods=["GET"])
+    @requires_auth
+    def search_transcriptions_by_video():
+        query_text = request.args.get("text", "")
+        page = request.args.get("page", 1, type=int)
+        per_page = request.args.get("per_page", 10, type=int)
+
+        search = SearchDTO(query_text, page, per_page)
+
+        return SearchController().search_transcriptions_by_video(search=search)
