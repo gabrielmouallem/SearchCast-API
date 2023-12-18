@@ -6,7 +6,7 @@ from api.v1.search.controller import SearchController
 
 
 def configure_v1_routes(app):
-    @app.route("/v1/search", methods=["GET"])
+    @app.route("/v1/search", methods=["GET"], endpoint="search_transcriptions")
     @requires_auth
     def search_transcriptions():
         query_text = request.args.get("text", "")
@@ -17,7 +17,11 @@ def configure_v1_routes(app):
 
         return SearchController().search_transcriptions(search=search)
 
-    @app.route("/v1/search_by_video", methods=["GET"])
+    @app.route(
+        "/v1/search_by_video",
+        methods=["GET"],
+        endpoint="search_transcriptions_by_video",
+    )
     @requires_auth
     def search_transcriptions_by_video():
         query_text = request.args.get("text", "")
