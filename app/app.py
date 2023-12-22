@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_cors import CORS
 from config import setup
@@ -7,6 +8,8 @@ env = setup()
 
 app = Flask(__name__)
 app.config.from_object(f"config.{env}.{env.capitalize()}Config")
+
+app.secret_key = os.environ.get("SECRET_KEY")
 
 CORS(app)
 configure_routes(app)
