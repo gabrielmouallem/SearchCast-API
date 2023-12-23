@@ -1,20 +1,24 @@
 from flask import jsonify, request
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from api.common.services.mongodb import get_db
 
 
-def authenticate(access_token):
-    db = get_db()
-    user = db.users.find_one({"access_token": access_token})
-    return user is not None
-
-
 def requires_auth(f):
-    """Decorator function to protect routes with authentication."""
+    db = get_db()
+    """Decorator function to protect routes with JWT authentication."""
 
     def decorated(*args, **kwargs):
-        access_token = request.headers.get("Bearer")
-        if not access_token or not authenticate(access_token):
-            return jsonify({"error": "Unauthorized"}), 401
+        verify_jwt_in_request()
+        current_user = get_jwt_identity()
+
+        print(f"current_user: {current_user}")
+
+        # Fetch the user from the database using the user
+        current_user = db.users.find_one(current_user)
+
+        if current_user is None:
+            return jsonify({"error": "User not found"}), 401
+
         return f(*args, **kwargs)
 
     return decorated

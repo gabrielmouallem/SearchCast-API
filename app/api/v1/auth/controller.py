@@ -1,9 +1,9 @@
-import os
-from flask import jsonify, request, session
+import datetime
+from flask import jsonify, session
 import re
 from passlib.hash import pbkdf2_sha256
 import uuid
-
+from flask_jwt_extended import create_access_token
 from api.v1.auth.dto import LoginDTO, UserDTO
 from api.common.decorators.requires_auth import get_db
 
@@ -18,8 +18,7 @@ class UserController:
         session["user"] = user
 
         # Concatenate user data and generate a hash as the access token
-        user_data_str = f"{user['_id']}:{user['name']}:{user['email']}"
-        access_token = pbkdf2_sha256.hash(user_data_str)
+        access_token = create_access_token(identity=user["_id"])
         session["access_token"] = access_token
 
         return jsonify(user), 200
@@ -41,17 +40,17 @@ class UserController:
         if not self._is_valid_password(password):
             return jsonify({"error": "Invalid password"}), 400
 
+        id = uuid.uuid4().hex
+
         # Create the user object
         user = {
-            "_id": uuid.uuid4().hex,
+            "_id": id,
             "name": name,
             "email": email,
             "password": password,
             "active_subscription": False,
+            "created_on": datetime.datetime.utcnow().isoformat(),
         }
-
-        user_data_str = f"{user['_id']}:{user['name']}:{user['email']}"
-        user["access_token"] = pbkdf2_sha256.hash(user_data_str)
 
         # Encrypt the password
         user["password"] = pbkdf2_sha256.encrypt(user["password"])
@@ -61,7 +60,13 @@ class UserController:
             return jsonify({"error": "Email address already in use"}), 400
 
         if self.db.users.insert_one(user):
-            return self.start_session(user)
+            access_token = create_access_token(identity=id)
+            return self.start_session(
+                {
+                    **user,
+                    "access_token": access_token,
+                }
+            )
 
         return jsonify({"error": "Signup failed"}), 400
 
@@ -82,6 +87,12 @@ class UserController:
         user = db.users.find_one({"email": login.email})
 
         if user and pbkdf2_sha256.verify(login.password, user["password"]):
-            return self.start_session(user)
+            access_token = create_access_token(identity=user["_id"])
+            return self.start_session(
+                {
+                    **user,
+                    "access_token": access_token,
+                }
+            )
 
         return jsonify({"error": "Invalid login credentials"}), 401
