@@ -3,9 +3,9 @@ from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from api.common.services.mongodb import get_db
 
 
-def requires_auth(f):
+def requires_payment(f):
     db = get_db()
-    """Decorator function to protect routes with JWT authentication."""
+    """Decorator function to prevent non-subscripted users to access features."""
 
     def decorated(*args, **kwargs):
         verify_jwt_in_request()
@@ -14,8 +14,8 @@ def requires_auth(f):
         # Fetch the user from the database using the user
         current_user = db.users.find_one(current_user)
 
-        if current_user is None:
-            return jsonify({"error": "User not found"}), 401
+        if current_user is None or not current_user["active_subscription"]:
+            return jsonify({"error": "User has not an active subscription"}), 401
 
         return f(*args, **kwargs)
 

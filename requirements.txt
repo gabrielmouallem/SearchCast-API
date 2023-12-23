@@ -34,5 +34,7 @@ Werkzeug==3.0.1
 gunicorn
 Flask-PyMongo==2.3.0
 youtube-transcript-api==0.6.1
+passlib==1.7.4
+Flask-JWT-Extended==4.6.0
 youtube-dl @ git+https://github.com/ytdl-org/youtube-dl.git@00ef748cc0e35ee60efd0f7a00e373ab8d1af86b
 six
