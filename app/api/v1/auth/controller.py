@@ -26,7 +26,6 @@ class UserController:
     def register(self, register: UserDTO):
         # Validate name
         name = register.name
-        print(name)
         if name is None or len(name) < 3:
             return jsonify({"error": "Invalid name"}), 400
 

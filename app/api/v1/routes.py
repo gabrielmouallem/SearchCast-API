@@ -1,6 +1,6 @@
 # routes.py
 from flask import request
-from api.common.decorators import requires_auth
+from api.common.decorators import requires_auth, requires_payment
 from api.v1.search.dto import SearchDTO
 from api.v1.search.controller import SearchController
 from api.v1.auth.controller import UserController
@@ -10,6 +10,7 @@ from api.v1.auth.dto import LoginDTO, UserDTO
 def configure_v1_routes(app):
     @app.route("/v1/search", methods=["GET"], endpoint="search_transcriptions")
     @requires_auth
+    @requires_payment
     def search_transcriptions():
         query_text = request.args.get("text", "")
         page = request.args.get("page", 1, type=int)
@@ -25,6 +26,7 @@ def configure_v1_routes(app):
         endpoint="search_transcriptions_by_video",
     )
     @requires_auth
+    @requires_payment
     def search_transcriptions_by_video():
         query_text = request.args.get("text", "")
         page = request.args.get("page", 1, type=int)
@@ -60,9 +62,5 @@ def configure_v1_routes(app):
         password = json["password"]
 
         register = UserDTO(name, email, password)
-
-        print(
-            f"{name} {email} {password} - {register.name} {register.email} {register.password}"
-        )
 
         return UserController().register(register=register)

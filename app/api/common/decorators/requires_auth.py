@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from api.common.services.mongodb import get_db
 
@@ -10,8 +10,6 @@ def requires_auth(f):
     def decorated(*args, **kwargs):
         verify_jwt_in_request()
         current_user = get_jwt_identity()
-
-        print(f"current_user: {current_user}")
 
         # Fetch the user from the database using the user
         current_user = db.users.find_one(current_user)
