@@ -15,7 +15,7 @@ def requires_payment(f):
         current_user = db.users.find_one(current_user)
 
         if current_user is None or not current_user["active_subscription"]:
-            return jsonify({"error": "User has not an active subscription"}), 401
+            return jsonify({"error": "User has not an active subscription"}), 403
 
         return f(*args, **kwargs)
 
