@@ -56,7 +56,6 @@ class SearchController:
                         }
                     }
                 },
-                {"$sort": {"video.publishDate": pymongo.DESCENDING}},
                 {
                     "$group": {
                         "_id": "$video._id",
@@ -73,6 +72,7 @@ class SearchController:
             ]
             # Create the text search query
             results_pipeline = common_pipeline + [
+                {"$sort": {"video.publishDate": pymongo.DESCENDING}},
                 {"$skip": skip_count},
                 {"$limit": search.per_page},
                 {
