@@ -12,7 +12,7 @@ def requires_auth(f):
         current_user = get_jwt_identity()
 
         # Fetch the user from the database using the user
-        current_user = db.users.find_one(current_user)
+        current_user = db.users.find_one(current_user["_id"])
 
         if current_user is None:
             return jsonify({"error": "User not found"}), 401

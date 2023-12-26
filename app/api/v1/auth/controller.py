@@ -18,7 +18,7 @@ class UserController:
         session["user"] = user
 
         # Concatenate user data and generate a hash as the access token
-        access_token = create_access_token(identity=user["_id"])
+        access_token = create_access_token(identity=user)
         session["access_token"] = access_token
 
         return jsonify(user), 200
@@ -59,7 +59,9 @@ class UserController:
             return jsonify({"error": "Email address already in use"}), 400
 
         if self.db.users.insert_one(user):
-            access_token = create_access_token(identity=id)
+            user_without_password = {**user}
+            del user_without_password["password"]
+            access_token = create_access_token(identity=user_without_password)
             return self.start_session(
                 {
                     **user,
@@ -86,7 +88,9 @@ class UserController:
         user = db.users.find_one({"email": login.email})
 
         if user and pbkdf2_sha256.verify(login.password, user["password"]):
-            access_token = create_access_token(identity=user["_id"])
+            user_without_password = {**user}
+            del user_without_password["password"]
+            access_token = create_access_token(identity=user_without_password)
             return self.start_session(
                 {
                     **user,
