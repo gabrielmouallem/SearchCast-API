@@ -1,5 +1,5 @@
 import datetime
-from flask import jsonify, session
+from flask import jsonify
 import re
 from passlib.hash import pbkdf2_sha256
 import uuid
