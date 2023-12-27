@@ -121,14 +121,14 @@ def configure_v1_routes(app):
             google_response,
         )
 
-        # try:
-        return UserController().google_login(login=login)
-        # except Exception as e:
-        #     return Response(
-        #         response=str(e),
-        #         status=500,
-        #         mimetype="application/json",
-        #     )
+        try:
+            return UserController().google_login(login=login)
+        except Exception as e:
+            return Response(
+                response=str(e),
+                status=500,
+                mimetype="application/json",
+            )
 
     @app.route(
         "/v1/register",
