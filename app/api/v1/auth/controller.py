@@ -5,7 +5,7 @@ from passlib.hash import pbkdf2_sha256
 import uuid
 from flask_jwt_extended import create_access_token
 import requests
-from api.v1.auth.dto import GoogleLoginDTO, GoogleResponseDTO, PasswordLoginDTO, UserDTO
+from api.v1.auth.dto import GoogleLoginDTO, PasswordLoginDTO, UserDTO
 from api.common.decorators.requires_auth import get_db
 
 
@@ -113,9 +113,8 @@ class UserController:
         return jsonify({"error": "Invalid login credentials"}), 401
 
     def google_login(self, login: GoogleLoginDTO):
-        google_response = login.google_response
         # Verify Google Access Token
-        google_token = google_response.id_token
+        google_token = login.id_token
         if not google_token:
             return jsonify({"error": "Invalid Google Sign-In response"}), 400
 
@@ -123,7 +122,6 @@ class UserController:
         if not google_user_info:
             return jsonify({"error": "Google token verification failed"}), 401
 
-        print(self.start_session_w_google(register=login))
         return self.start_session_w_google(register=login)
 
     def verify_google_token(self, google_token):
