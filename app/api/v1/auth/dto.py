@@ -8,27 +8,19 @@ class UserDTO:
 class GoogleResponseDTO:
     def __init__(
         self,
-        token_type,
         access_token,
-        scope,
-        login_hint,
+        token_type,
         expires_in,
-        id_token,
-        session_state,
-        first_issued_at,
-        expires_at,
-        idpId,
+        scope,
+        authuser,
+        prompt,
     ):
-        self.token_type = token_type
         self.access_token = access_token
-        self.scope = scope
-        self.login_hint = login_hint
+        self.token_type = token_type
         self.expires_in = expires_in
-        self.id_token = id_token
-        self.session_state = session_state
-        self.first_issued_at = first_issued_at
-        self.expires_at = expires_at
-        self.idpId = idpId
+        self.scope = scope
+        self.authuser = authuser
+        self.prompt = prompt
 
 
 class PasswordLoginDTO:
@@ -38,20 +30,10 @@ class PasswordLoginDTO:
 
 
 class GoogleLoginDTO:
-    def __init__(
-        self,
-        google_id,
-        image_url,
-        email,
-        name,
-        given_name,
-        family_name,
-        google_response: GoogleResponseDTO,
-    ):
-        self.googleId = google_id
-        self.imageUrl = image_url
-        self.email = email
+    def __init__(self, name, picture, family_name, given_name, email, id_token):
         self.name = name
-        self.givenName = given_name
-        self.familyName = family_name
-        self.google_response = google_response
+        self.picture = picture
+        self.family_name = family_name
+        self.given_name = given_name
+        self.email = email
+        self.id_token = id_token

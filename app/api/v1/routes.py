@@ -78,48 +78,14 @@ def configure_v1_routes(app):
     )
     def google_login():
         json = request.get_json()
-        googleId = json["googleId"]
-        imageUrl = json["imageUrl"]
-        email = json["email"]
         name = json["name"]
-        givenName = json["givenName"]
-        familyName = json["familyName"]
+        picture = json["picture"]
+        family_name = json["family_name"]
+        given_name = json["given_name"]
+        email = json["email"]
+        id_token = json["id_token"]
 
-        raw_google_response = json["google_response"]
-
-        token_type = raw_google_response["token_type"]
-        access_token = raw_google_response["access_token"]
-        scope = raw_google_response["scope"]
-        login_hint = raw_google_response["login_hint"]
-        expires_in = raw_google_response["expires_in"]
-        id_token = raw_google_response["id_token"]
-        session_state = raw_google_response["session_state"]
-        first_issued_at = raw_google_response["first_issued_at"]
-        expires_at = raw_google_response["expires_at"]
-        idpId = raw_google_response["idpId"]
-
-        google_response = GoogleResponseDTO(
-            token_type,
-            access_token,
-            scope,
-            login_hint,
-            expires_in,
-            id_token,
-            session_state,
-            first_issued_at,
-            expires_at,
-            idpId,
-        )
-
-        login = GoogleLoginDTO(
-            googleId,
-            imageUrl,
-            email,
-            name,
-            givenName,
-            familyName,
-            google_response,
-        )
+        login = GoogleLoginDTO(name, picture, family_name, given_name, email, id_token)
 
         try:
             return UserController().google_login(login=login)
