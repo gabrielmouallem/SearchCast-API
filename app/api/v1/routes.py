@@ -12,7 +12,10 @@ from api.v1.search.dto import SearchDTO
 from api.v1.search.controller import SearchController
 from api.v1.auth.controller import UserController
 from api.v1.auth.dto import GoogleLoginDTO, PasswordLoginDTO, UserDTO
-from api.v1.webhook.constants import STRIPE_PLANS_LINE_ITEMS
+from api.v1.webhook.constants import (
+    DEV_STRIPE_PLANS_LINE_ITEMS,
+    PROD_STRIPE_PLANS_LINE_ITEMS,
+)
 from api.common.services.mongodb.mongodb_service import get_db
 from api.common.utils.utils import get_proper_user_data
 
@@ -154,13 +157,18 @@ def configure_v1_routes(app):
         json = request.get_json()
         subscription_type = json["subscription_type"]
         customer_email = json["customer_email"]
+        is_prod = os.environ.get("FLASK_ENV") == "depoyment"
         # Implement logic to create a checkout session with Stripe.
         # Return the session ID to the frontend.
         try:
             frontend_url = os.environ.get("FRONTEND_URL")
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
-                line_items=[STRIPE_PLANS_LINE_ITEMS[subscription_type]],
+                line_items=[
+                    DEV_STRIPE_PLANS_LINE_ITEMS[subscription_type]
+                    if is_prod
+                    else PROD_STRIPE_PLANS_LINE_ITEMS[subscription_type]
+                ],
                 customer_email=customer_email,
                 mode="subscription",
                 success_url=f"{frontend_url}/search",  # Change to your success URL
