@@ -155,7 +155,7 @@ def configure_v1_routes(app):
         json = request.get_json()
         subscription_type = json["subscription_type"]
         customer_email = json["customer_email"]
-        is_prod = os.environ.get("FLASK_ENV") == "depoyment"
+        is_prod = os.environ.get("FLASK_ENV") == "deployment"
         # Implement logic to create a checkout session with Stripe.
         # Return the session ID to the frontend.
         try:
