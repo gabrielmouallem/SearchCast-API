@@ -30,9 +30,8 @@ class PasswordLoginDTO:
 
 
 class GoogleLoginDTO:
-    def __init__(self, name, picture, given_name, email, id_token):
+    def __init__(self, name, picture, email, id_token):
         self.name = name
         self.picture = picture
-        self.given_name = given_name
         self.email = email
         self.id_token = id_token

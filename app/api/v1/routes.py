@@ -113,11 +113,10 @@ def configure_v1_routes(app):
         json = request.get_json()
         name = json["name"]
         picture = json["picture"]
-        given_name = json["given_name"]
         email = json["email"]
         id_token = json["id_token"]
 
-        login = GoogleLoginDTO(name, picture, given_name, email, id_token)
+        login = GoogleLoginDTO(name, picture, email, id_token)
 
         try:
             return UserController().google_login(login=login)
