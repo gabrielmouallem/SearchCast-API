@@ -3,10 +3,13 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+import stripe
 from config import setup
 from routes import configure_routes
 
 env = setup()
+
+stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 
 app = Flask(__name__)
 app.config.from_object(f"config.{env}.{env.capitalize()}Config")

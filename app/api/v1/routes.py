@@ -1,10 +1,25 @@
 # routes.py
-from flask import Response, request
+import os
+from flask import Response, jsonify, request
+from flask_jwt_extended import (
+    create_access_token,
+    get_jwt_identity,
+    verify_jwt_in_request,
+)
+import stripe
 from api.common.decorators import requires_auth, requires_payment
 from api.v1.search.dto import SearchDTO
 from api.v1.search.controller import SearchController
 from api.v1.auth.controller import UserController
-from api.v1.auth.dto import GoogleLoginDTO, GoogleResponseDTO, PasswordLoginDTO, UserDTO
+from api.v1.auth.dto import GoogleLoginDTO, PasswordLoginDTO, UserDTO
+from api.v1.webhook.constants import (
+    DEV_STRIPE_PLANS_LINE_ITEMS,
+    PROD_STRIPE_PLANS_LINE_ITEMS,
+)
+from api.common.services.mongodb.mongodb_service import get_db
+from api.common.utils.utils import get_proper_user_data
+
+endpoint_secret = os.environ.get("STRIPE_WEBHOOK_ENDPOINT_SECRET")
 
 
 def configure_v1_routes(app):
@@ -71,6 +86,24 @@ def configure_v1_routes(app):
                 mimetype="application/json",
             )
 
+    @requires_auth
+    @app.route("/v1/refresh", methods=["GET"], endpoint="refresh")
+    def refresh_token():
+        verify_jwt_in_request()
+        current_user = get_jwt_identity()
+        current_user = get_db().users.find_one(current_user["_id"])
+        user_data = get_proper_user_data(current_user)
+
+        # Return the access token as a JSON response
+        try:
+            return jsonify({"access_token": create_access_token(user_data)})
+        except Exception as e:
+            return Response(
+                response=str(e),
+                status=500,
+                mimetype="application/json",
+            )
+
     @app.route(
         "/v1/google_login",
         methods=["POST"],
@@ -117,3 +150,95 @@ def configure_v1_routes(app):
                 status=500,
                 mimetype="application/json",
             )
+
+    @requires_auth
+    @app.route("/checkout", methods=["POST"])
+    def create_checkout_session():
+        json = request.get_json()
+        subscription_type = json["subscription_type"]
+        customer_email = json["customer_email"]
+        is_prod = os.environ.get("FLASK_ENV") == "depoyment"
+        # Implement logic to create a checkout session with Stripe.
+        # Return the session ID to the frontend.
+        try:
+            frontend_url = os.environ.get("FRONTEND_URL")
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    PROD_STRIPE_PLANS_LINE_ITEMS[subscription_type]
+                    if is_prod
+                    else DEV_STRIPE_PLANS_LINE_ITEMS[subscription_type]
+                ],
+                customer_email=customer_email,
+                mode="subscription",
+                success_url=f"{frontend_url}/search",  # Change to your success URL
+                cancel_url=f"{frontend_url}/plans",  # Change to your cancel URL
+            )
+            return jsonify({"sessionId": session.id})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 403
+
+    @requires_auth
+    @app.route("/cancel", methods=["POST"])
+    def cancel_plan():
+        json = request.get_json()
+        customer_email = json["customer_email"]
+
+        db = get_db()
+        user = db.users.find_one({"email": customer_email})
+        subscription_id = user["subscription"]["id"]
+
+        try:
+            stripe.Subscription.modify(
+                subscription_id,
+                cancel_at_period_end=True,
+                cancellation_details={"comment": "Cancelled via backend"},
+            )
+            return jsonify({"access_token": "Plan cancelled"})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 403
+
+    @requires_auth
+    @app.route("/webhook", methods=["POST"])
+    def webhook():
+        db = get_db()
+        event = request.json
+
+        # Handle the event
+        if event["type"] == "checkout.session.completed":
+            session = event["data"]["object"]
+            db.checkouts.insert_one({**session, "_id": session["id"]})
+
+        elif event["type"] == "customer.subscription.created":
+            handle_subscription_event(event)
+
+        elif event["type"] == "customer.subscription.updated":
+            handle_subscription_event(event)
+
+        elif event["type"] == "customer.subscription.deleted":
+            handle_subscription_event(event)
+
+        else:
+            print(f"Unhandled event type {event['type']}")
+
+        return jsonify(success=True)
+
+
+def handle_subscription_event(event):
+    db = get_db()
+    subscription = event["data"]["object"]
+
+    found_subscription = db.subscriptions.find_one({"_id": subscription["id"]})
+
+    if found_subscription is not None:
+        db.subscriptions.update_one({"_id": subscription["id"]}, {"$set": subscription})
+    else:
+        db.subscriptions.insert_one({**subscription, "_id": subscription["id"]})
+
+    customer = stripe.Customer.retrieve(subscription["customer"])
+
+    email = customer.email
+    db.users.update_one(
+        {"email": email},
+        {"$set": {"subscription": subscription}},
+    )

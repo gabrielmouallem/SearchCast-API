@@ -7,6 +7,7 @@ from flask_jwt_extended import create_access_token
 import requests
 from api.v1.auth.dto import GoogleLoginDTO, PasswordLoginDTO, UserDTO
 from api.common.decorators.requires_auth import get_db
+from api.common.utils.utils import get_proper_user_data
 
 
 class UserController:
@@ -17,8 +18,9 @@ class UserController:
         if "password" in user:
             del user["password"]
         # Concatenate user data and generate a hash as the access token
-        access_token = create_access_token(identity=user)
-        return jsonify({**user, "access_token": access_token}), 200
+        user_data = get_proper_user_data(user)
+        access_token = create_access_token(identity=user_data)
+        return jsonify({**user_data, "access_token": access_token}), 200
 
     def register_w_password(self, register: UserDTO):
         # Validate name
@@ -43,8 +45,8 @@ class UserController:
             "_id": id,
             "name": name,
             "email": email,
+            "allow_unpaid_access": False,
             "password": password,
-            "active_subscription": False,
             "auth_type": "password",
             "created_on": datetime.datetime.utcnow().isoformat(),
         }
@@ -57,14 +59,11 @@ class UserController:
             return jsonify({"error": "Email address already in use"}), 400
 
         if self.db.users.insert_one(user):
-            user_without_password = {**user}
-            del user_without_password["password"]
             return self.start_session(user)
 
         return jsonify({"error": "Signup failed"}), 400
 
     def start_session_w_google(self, register: GoogleLoginDTO):
-        print("start_session_w_google")
         id = uuid.uuid4().hex
 
         # Create the user object
@@ -72,7 +71,7 @@ class UserController:
             "_id": id,
             "name": register.name,
             "email": register.email,
-            "active_subscription": False,
+            "allow_unpaid_access": False,
             "auth_type": "google",
             "created_on": datetime.datetime.utcnow().isoformat(),
         }
@@ -80,7 +79,7 @@ class UserController:
         # Check for existing email address
         to_find_user = self.db.users.find_one(
             {"email": user["email"]}
-        )  # To get proper active_subscription value
+        )  # To get proper user with all the user values
         if to_find_user:
             return self.start_session(to_find_user)
 
