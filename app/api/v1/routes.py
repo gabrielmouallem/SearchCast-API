@@ -1,7 +1,11 @@
 # routes.py
 import os
 from flask import Response, jsonify, request
-from flask_jwt_extended import get_jwt_identity, verify_jwt_in_request
+from flask_jwt_extended import (
+    create_access_token,
+    get_jwt_identity,
+    verify_jwt_in_request,
+)
 import stripe
 from api.common.decorators import requires_auth, requires_payment
 from api.v1.search.dto import SearchDTO
@@ -89,7 +93,7 @@ def configure_v1_routes(app):
 
         # Return the access token as a JSON response
         try:
-            return jsonify({"access_token": user_data})
+            return jsonify({"access_token": create_access_token(user_data)})
         except Exception as e:
             return Response(
                 response=str(e),
