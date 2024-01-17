@@ -36,3 +36,32 @@ def extract_video_id(url: str):
         return match.group(1)
     else:
         return None
+
+
+def get_proper_user_data(user):
+    new_user_data = {**user}
+    if "password" in new_user_data:
+        del new_user_data["password"]
+    if "subscription" in user:
+        plan = "month"
+        print(new_user_data["subscription"]["plan"])
+        interval = new_user_data["subscription"]["plan"]["interval"]
+        interval_count = new_user_data["subscription"]["plan"]["interval_count"]
+
+        if interval == "year":
+            plan = "year"
+        if interval == "month":
+            if interval_count == 6:
+                plan = "semester"
+
+        return {
+            **new_user_data,
+            "subscription": {
+                "current_period_end": new_user_data["subscription"][
+                    "current_period_end"
+                ],
+                "cancel_at": new_user_data["subscription"]["cancel_at"],
+                "plan": plan,
+            },
+        }
+    return new_user_data
