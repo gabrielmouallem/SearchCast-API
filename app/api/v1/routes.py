@@ -165,9 +165,9 @@ def configure_v1_routes(app):
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
                 line_items=[
-                    DEV_STRIPE_PLANS_LINE_ITEMS[subscription_type]
+                    PROD_STRIPE_PLANS_LINE_ITEMS[subscription_type]
                     if is_prod
-                    else PROD_STRIPE_PLANS_LINE_ITEMS[subscription_type]
+                    else DEV_STRIPE_PLANS_LINE_ITEMS[subscription_type]
                 ],
                 customer_email=customer_email,
                 mode="subscription",
