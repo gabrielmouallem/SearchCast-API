@@ -12,7 +12,7 @@ def requires_payment(f):
         current_user = get_jwt_identity()
 
         # Fetch the user from the database using the user ID
-        user_data = db.users.find_one(current_user)
+        user_data = db.users.find_one({"email": current_user["email"]})
 
         # Check if allow_unpaid_access is True
         if user_data.get("allow_unpaid_access", False):

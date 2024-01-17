@@ -44,7 +44,6 @@ def get_proper_user_data(user):
         del new_user_data["password"]
     if "subscription" in user:
         plan = "month"
-        print(new_user_data["subscription"]["plan"])
         interval = new_user_data["subscription"]["plan"]["interval"]
         interval_count = new_user_data["subscription"]["plan"]["interval_count"]
 

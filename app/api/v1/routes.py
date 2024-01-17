@@ -163,8 +163,8 @@ def configure_v1_routes(app):
                 line_items=[STRIPE_PLANS_LINE_ITEMS[subscription_type]],
                 customer_email=customer_email,
                 mode="subscription",
-                success_url=f"{frontend_url}/search?success=true",  # Change to your success URL
-                cancel_url=f"{frontend_url}/plans?success=false",  # Change to your cancel URL
+                success_url=f"{frontend_url}/search",  # Change to your success URL
+                cancel_url=f"{frontend_url}/plans",  # Change to your cancel URL
             )
             return jsonify({"sessionId": session.id})
         except Exception as e:
@@ -219,7 +219,13 @@ def configure_v1_routes(app):
 def handle_subscription_event(event):
     db = get_db()
     subscription = event["data"]["object"]
-    db.subscriptions.insert_one({**subscription, "_id": subscription["id"]})
+
+    found_subscription = db.subscriptions.find_one({"_id": subscription["id"]})
+
+    if found_subscription is not None:
+        db.subscriptions.update_one({"_id": subscription["id"]}, {"$set": subscription})
+    else:
+        db.subscriptions.insert_one({**subscription, "_id": subscription["id"]})
 
     customer = stripe.Customer.retrieve(subscription["customer"])
 

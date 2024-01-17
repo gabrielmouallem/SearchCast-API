@@ -45,6 +45,7 @@ class UserController:
             "_id": id,
             "name": name,
             "email": email,
+            "allow_unpaid_access": False,
             "password": password,
             "auth_type": "password",
             "created_on": datetime.datetime.utcnow().isoformat(),
@@ -70,6 +71,7 @@ class UserController:
             "_id": id,
             "name": register.name,
             "email": register.email,
+            "allow_unpaid_access": False,
             "auth_type": "google",
             "created_on": datetime.datetime.utcnow().isoformat(),
         }
