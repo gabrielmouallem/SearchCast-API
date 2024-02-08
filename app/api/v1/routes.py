@@ -6,7 +6,6 @@ from flask_jwt_extended import (
     get_jwt_identity,
     verify_jwt_in_request,
 )
-import stripe
 from api.common.decorators import requires_auth, requires_payment
 from api.v1.search.dto import SearchDTO
 from api.v1.search.controller import SearchController
@@ -18,6 +17,8 @@ from api.v1.webhook.constants import (
 )
 from api.common.services.mongodb.mongodb_service import get_db
 from api.common.utils.utils import get_proper_user_data
+from api.common.services.webhook.webhook_service import WebhookService
+from api.common.services.payment.payment_service import PaymentService
 
 endpoint_secret = os.environ.get("STRIPE_WEBHOOK_ENDPOINT_SECRET")
 
@@ -155,22 +156,13 @@ def configure_v1_routes(app):
         json = request.get_json()
         subscription_type = json["subscription_type"]
         customer_email = json["customer_email"]
-        is_prod = os.environ.get("FLASK_ENV") == "deployment"
+
         # Implement logic to create a checkout session with Stripe.
         # Return the session ID to the frontend.
         try:
-            frontend_url = os.environ.get("FRONTEND_URL")
-            session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                line_items=[
-                    PROD_STRIPE_PLANS_LINE_ITEMS[subscription_type]
-                    if is_prod
-                    else DEV_STRIPE_PLANS_LINE_ITEMS[subscription_type]
-                ],
-                customer_email=customer_email,
-                mode="subscription",
-                success_url=f"{frontend_url}/search",  # Change to your success URL
-                cancel_url=f"{frontend_url}/plans",  # Change to your cancel URL
+            session = PaymentService().make_checkout(customer_email, subscription_type)
+            print(
+                f"{customer_email} started the checkout session using the {subscription_type} plan"
             )
             return jsonify({"sessionId": session.id})
         except Exception as e:
@@ -187,11 +179,14 @@ def configure_v1_routes(app):
         subscription_id = user["subscription"]["id"]
 
         try:
-            stripe.Subscription.modify(
+            PaymentService().change_subscription(
                 subscription_id,
-                cancel_at_period_end=True,
-                cancellation_details={"comment": "Cancelled via backend"},
+                {
+                    "cancel_at_period_end": True,
+                    "cancellation_details": {"comment": "Cancelled via backend"},
+                },
             )
+            print(f"{customer_email} cancelled the subscription - id {subscription_id}")
             return jsonify({"access_token": "Plan cancelled"})
         except Exception as e:
             return jsonify({"error": str(e)}), 403
@@ -199,44 +194,14 @@ def configure_v1_routes(app):
     @requires_auth
     @app.route("/webhook", methods=["POST"])
     def webhook():
-        db = get_db()
         event = request.json
-
-        # Handle the event
-        if event["type"] == "checkout.session.completed":
-            session = event["data"]["object"]
-            db.checkouts.insert_one({**session, "_id": session["id"]})
-
-        elif event["type"] == "customer.subscription.created":
-            handle_subscription_event(event)
-
-        elif event["type"] == "customer.subscription.updated":
-            handle_subscription_event(event)
-
-        elif event["type"] == "customer.subscription.deleted":
-            handle_subscription_event(event)
-
-        else:
-            print(f"Unhandled event type {event['type']}")
-
-        return jsonify(success=True)
-
-
-def handle_subscription_event(event):
-    db = get_db()
-    subscription = event["data"]["object"]
-
-    found_subscription = db.subscriptions.find_one({"_id": subscription["id"]})
-
-    if found_subscription is not None:
-        db.subscriptions.update_one({"_id": subscription["id"]}, {"$set": subscription})
-    else:
-        db.subscriptions.insert_one({**subscription, "_id": subscription["id"]})
-
-    customer = stripe.Customer.retrieve(subscription["customer"])
-
-    email = customer.email
-    db.users.update_one(
-        {"email": email},
-        {"$set": {"subscription": subscription}},
-    )
+        try:
+            WebhookService(event).handle_events()
+            return jsonify(success=True)
+        except Exception as e:
+            print(f" Webhook error {e}")
+            return Response(
+                response=str(e),
+                status=500,
+                mimetype="application/json",
+            )
