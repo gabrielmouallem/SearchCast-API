@@ -58,6 +58,14 @@ def configure_v1_routes(app):
         search = SearchDTO(query_text, page, per_page)
 
         try:
+            # Decoding JWT token and retrieving email attribute
+            current_user = get_jwt_identity()
+            email = current_user.get("email") if current_user else None
+
+            # Printing email if page is equal to 1
+            if page == 1:
+                print(f"{email} - searched '{query_text}'")
+
             return SearchController().search_transcriptions_by_video(search=search)
         except Exception as e:
             return Response(
@@ -120,6 +128,7 @@ def configure_v1_routes(app):
         login = GoogleLoginDTO(name, picture, email, id_token)
 
         try:
+            print(f"{email} - logged with google")
             return UserController().google_login(login=login)
         except Exception as e:
             return Response(
@@ -142,6 +151,7 @@ def configure_v1_routes(app):
         register = UserDTO(name, email, password)
 
         try:
+            print(f"{email} - registered with password")
             return UserController().register_w_password(register=register)
         except Exception as e:
             return Response(
@@ -162,7 +172,7 @@ def configure_v1_routes(app):
         try:
             session = PaymentService().make_checkout(customer_email, subscription_type)
             print(
-                f"{customer_email} started the checkout session using the {subscription_type} plan"
+                f"{customer_email} - started the checkout session using the {subscription_type} plan"
             )
             return jsonify({"sessionId": session.id})
         except Exception as e:
@@ -186,7 +196,9 @@ def configure_v1_routes(app):
                     "cancellation_details": {"comment": "Cancelled via backend"},
                 },
             )
-            print(f"{customer_email} cancelled the subscription - id {subscription_id}")
+            print(
+                f"{customer_email} - cancelled the subscription - id {subscription_id}"
+            )
             return jsonify({"access_token": "Plan cancelled"})
         except Exception as e:
             return jsonify({"error": str(e)}), 403
