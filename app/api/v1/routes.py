@@ -95,6 +95,44 @@ def configure_v1_routes(app):
                 mimetype="application/json",
             )
 
+    @app.route(
+        "/v1/forgot-password",
+        methods=["POST"],
+        endpoint="forgot-password",
+    )
+    def forgot_password():
+        json = request.get_json()
+        email = json["email"]
+        try:
+            return UserController().forgot_password(email=email)
+        except Exception as e:
+            print(e)
+            return Response(
+                response=str(e),
+                status=500,
+                mimetype="application/json",
+            )
+
+    @app.route(
+        "/v1/password-reset",
+        methods=["POST"],
+        endpoint="password-reset",
+    )
+    def password_reset():
+        json = request.get_json()
+        token = json["token"]
+        password = json["password"]
+
+        try:
+            return UserController().password_reset(token=token, new_password=password)
+        except Exception as e:
+            print(e)
+            return Response(
+                response=str(e),
+                status=500,
+                mimetype="application/json",
+            )
+
     @requires_auth
     @app.route("/v1/refresh", methods=["GET"], endpoint="refresh")
     def refresh_token():
