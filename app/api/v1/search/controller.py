@@ -113,3 +113,48 @@ class SearchController:
                 status=500,
                 mimetype="application/json",
             )
+
+    def expanded_transcription(self, video_id, start_time):
+
+        # Aggregation pipeline to find 2 before and 2 after the target transcription
+        pipeline = [
+            {
+                "$match": {
+                    "video._id": video_id,
+                    "start": {"$gt": start_time - 10, "$lt": start_time + 10},
+                }
+            },
+            {"$sort": {"start": 1}},  # Ensure documents are sorted by start time
+            {
+                "$group": {
+                    "_id": "$video._id",  # Grouping by videoId, adjust if you need different granularity
+                    "merged_start": {"$first": "$start"},
+                    "merged_end": {"$last": {"$add": ["$start", "$duration"]}},
+                    "merged_text": {"$push": "$text"},
+                    "merged_duration": {"$sum": "$duration"},
+                }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    "start": "$merged_start",
+                    "end": "$merged_end",
+                    "text": {
+                        "$reduce": {
+                            "input": "$merged_text",
+                            "initialValue": "",
+                            "in": {"$concat": ["$$value", " ", "$$this"]},
+                        }
+                    },
+                    "duration": "$merged_duration",
+                }
+            },
+        ]
+
+        transcriptions = self.search_service.aggregate_transcriptions(pipeline=pipeline)
+        if len(transcriptions) > 0:
+            return jsonify(transcriptions)
+        return (
+            jsonify({"error": "No transcriptions found or error in aggregation"}),
+            404,
+        )

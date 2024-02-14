@@ -75,6 +75,28 @@ def configure_v1_routes(app):
             )
 
     @app.route(
+        "/v1/expand-transcription",
+        methods=["GET"],
+        endpoint="expand-transcriptions",
+    )
+    @requires_auth
+    @requires_payment
+    def expand_transcriptions():
+        video_id = request.args.get("videoId")
+        start_time = float(request.args.get("start"))
+
+        try:
+            return SearchController().expanded_transcription(
+                video_id=video_id, start_time=start_time
+            )
+        except Exception as e:
+            return Response(
+                response=str(e),
+                status=500,
+                mimetype="application/json",
+            )
+
+    @app.route(
         "/v1/login",
         methods=["POST"],
         endpoint="login",
