@@ -20,6 +20,7 @@ playlist_urls = [
     "https://www.youtube.com/watch?v=ObdvuVmYOy4&list=PLkKsdR0a6X5Qz26LZ20WcukTWbNUVXAVN",
     "https://www.youtube.com/watch?v=9JyRGOiBt0o&list=PL2LH9u21t_RQC1viFOKJOvUa9aPwi9Aez",
     "https://www.youtube.com/watch?v=n-53I1tfnIw&list=PLczDDIRnclWRAi9rLUxxUHz2j7XSEothf",
+    "https://www.youtube.com/watch?v=1oEaEB0j3bc&list=PLap7g1BFssvl6xYS8OyNk4JvJBMUeEKfo",
 ]
 
 
