@@ -1,14 +1,10 @@
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+import resend
 
 
 class EmailService:
     def __init__(self):
-        # Set your sender email and password here
-        self.sender_email = "searchcast.noreply@gmail.com"
-        self.password = os.environ.get("EMAIL_PASSWORD")
+        resend.api_key = os.environ["RESEND_API_KEY"]
 
     def send(self, email_data):
         receiver_email = email_data.get("to")
@@ -19,19 +15,15 @@ class EmailService:
             print("Missing required parameters. Email not sent.")
             return
 
-        # Create a message
-        message = MIMEMultipart("alternative")
-        message["From"] = self.sender_email
-        message["To"] = receiver_email
-        message["Subject"] = subject
+        params: resend.Emails.SendParams = {
+            "from": "searchcast.noreply@gmail.com",
+            "to": [receiver_email],
+            "subject": subject,
+            "html": html_body,
+        }
 
-        # Attach HTML body
-        html_part = MIMEText(html_body, "html")
-        message.attach(html_part)
-
-        # Connect to the SMTP server (Gmail in this case)
-        with smtplib.SMTP("smtp.gmail.com", 587) as server:
-            server.starttls()
-            server.login(self.sender_email, self.password)
-            text = message.as_string()
-            server.sendmail(self.sender_email, receiver_email, text)
+        try:
+            email = resend.Emails.send(params)
+            print("Email sent successfully:", email)
+        except Exception as e:
+            print(f"Failed to send email. Error: {e}")
