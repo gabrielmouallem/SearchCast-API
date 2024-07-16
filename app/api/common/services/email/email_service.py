@@ -16,7 +16,7 @@ class EmailService:
             return
 
         params: resend.Emails.SendParams = {
-            "from": "Contato <contato@searchcast.app>",
+            "from": "SearchCast <contato@searchcast.app>",
             "to": [receiver_email],
             "subject": subject,
             "html": html_body,
