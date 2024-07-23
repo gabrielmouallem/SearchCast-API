@@ -3,15 +3,15 @@ import stripe
 
 DEV_STRIPE_PLANS_LINE_ITEMS = {
     "month": {
-        "price": "price_1OZM8IAvzLrWK4UoODoTiG26",
+        "price": "price_1PfmJPAvzLrWK4UoMHHjVuoH",
         "quantity": 1,
     },
     "semester": {
-        "price": "price_1OZM8lAvzLrWK4UobrDN6Olu",
+        "price": "price_1PfmKjAvzLrWK4UoKB8bkIsj",
         "quantity": 1,
     },
     "year": {
-        "price": "price_1OZM9OAvzLrWK4UovBH6p7iJ",
+        "price": "price_1PfmLCAvzLrWK4UoGdAuFtEI",
         "quantity": 1,
     },
 }
