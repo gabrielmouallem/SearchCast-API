@@ -18,15 +18,15 @@ DEV_STRIPE_PLANS_LINE_ITEMS = {
 
 PROD_STRIPE_PLANS_LINE_ITEMS = {
     "month": {
-        "price": "price_1OZQCzAvzLrWK4Uo2GEDw2FH",
+        "price": "price_1PfmRWAvzLrWK4UoeDD4Kp9k",
         "quantity": 1,
     },
     "semester": {
-        "price": "price_1OZQChAvzLrWK4UoaX0hpjWd",
+        "price": "price_1PfmRRAvzLrWK4UowA3jhbCL",
         "quantity": 1,
     },
     "year": {
-        "price": "price_1OZQC9AvzLrWK4UogSbROUH9",
+        "price": "price_1PfmRPAvzLrWK4Uog9sgtVb5",
         "quantity": 1,
     },
 }
