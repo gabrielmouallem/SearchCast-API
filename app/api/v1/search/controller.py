@@ -1,6 +1,4 @@
-# controller.py
 from flask import jsonify, Response
-import pymongo
 from .dto import SearchDTO
 from .service import SearchService
 
@@ -11,41 +9,9 @@ class SearchController:
     def __init__(self):
         self.search_service = SearchService()
 
-    def search_transcriptions(self, search: SearchDTO):
-        try:
-            # Create the text search query
-            text_search_query = {
-                "$text": {"$search": format_text_to_double_quotes(search.query_text)}
-            }
-
-            # Perform the search with pagination
-            result_data = self.search_service.search_transcriptions(
-                query=text_search_query,
-                page=search.page,
-                per_page=search.per_page,
-            )
-
-            result_count = self.search_service.count_transcriptions(
-                query=text_search_query
-            )
-
-            response_data = {
-                "page": search.page,
-                "results": result_data,
-                "count": result_count,
-            }
-
-            return jsonify(response_data)
-
-        except Exception as e:
-            return Response(
-                response=str(e),
-                status=500,
-                mimetype="application/json",
-            )
-
     def search_transcriptions_by_video(self, search: SearchDTO):
         try:
+            print(search.order_by)
             skip_count = (search.page - 1) * search.per_page
 
             common_pipeline = [
@@ -56,6 +22,7 @@ class SearchController:
                         }
                     }
                 },
+                {"$addFields": {"video.viewCount": {"$toInt": "$video.viewCount"}}},
                 {
                     "$group": {
                         "_id": "$video._id",
@@ -72,7 +39,7 @@ class SearchController:
             ]
             # Create the text search query
             results_pipeline = common_pipeline + [
-                {"$sort": {"video.publishDate": pymongo.DESCENDING}},
+                {"$sort": search.order_by},
                 {"$skip": skip_count},
                 {"$limit": search.per_page},
                 {
