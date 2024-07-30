@@ -11,7 +11,6 @@ class SearchController:
 
     def search_transcriptions_by_video(self, search: SearchDTO):
         try:
-            print(search.order_by)
             skip_count = (search.page - 1) * search.per_page
 
             common_pipeline = [
