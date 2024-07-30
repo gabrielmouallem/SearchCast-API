@@ -1,6 +1,7 @@
+from enum import Enum
 import hashlib
+from pymongo import ASCENDING, DESCENDING
 import re
-from typing import Any, List
 
 
 def format_text_to_double_quotes(text: str):
@@ -64,3 +65,28 @@ def get_proper_user_data(user):
             },
         }
     return new_user_data
+
+
+class OrderByOptions(Enum):
+    PUBLISH_DATE_ASC = "video.publishDate.asc"
+    PUBLISH_DATE_DESC = "video.publishDate.desc"
+    VIEW_COUNT_ASC = "video.viewCount.asc"
+    VIEW_COUNT_DESC = "video.viewCount.desc"
+
+
+# Define the allowed order-by options using the enum directly
+ALLOWED_ORDER_BY_OPTIONS = set(OrderByOptions)
+
+
+def sanitize_and_convert_order_by(order_by_str):
+    # Sanitize the input
+    try:
+        order_by_option = OrderByOptions(order_by_str)
+    except ValueError:
+        order_by_option = OrderByOptions.PUBLISH_DATE_ASC
+
+    # Convert to pymongo format
+    field, order = order_by_option.value.rsplit(".", 1)
+    pymongo_order = ASCENDING if order == "asc" else DESCENDING
+
+    return {field: pymongo_order}

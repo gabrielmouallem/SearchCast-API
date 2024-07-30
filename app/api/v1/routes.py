@@ -1,4 +1,3 @@
-# routes.py
 import os
 from flask import Response, jsonify, request
 from flask_jwt_extended import (
@@ -11,12 +10,12 @@ from api.v1.search.dto import SearchDTO
 from api.v1.search.controller import SearchController
 from api.v1.auth.controller import UserController
 from api.v1.auth.dto import GoogleLoginDTO, PasswordLoginDTO, UserDTO
-from api.v1.webhook.constants import (
-    DEV_STRIPE_PLANS_LINE_ITEMS,
-    PROD_STRIPE_PLANS_LINE_ITEMS,
-)
 from api.common.services.mongodb.mongodb_service import get_db
-from api.common.utils.utils import get_proper_user_data
+from api.common.utils.utils import (
+    get_proper_user_data,
+    sanitize_and_convert_order_by,
+    OrderByOptions,
+)
 from api.common.services.webhook.webhook_service import WebhookService
 from api.common.services.payment.payment_service import PaymentService
 
@@ -24,38 +23,23 @@ endpoint_secret = os.environ.get("STRIPE_WEBHOOK_ENDPOINT_SECRET")
 
 
 def configure_v1_routes(app):
-    @app.route("/v1/search", methods=["GET"], endpoint="search_transcriptions")
-    @requires_auth
-    @requires_payment
-    def search_transcriptions():
-        query_text = request.args.get("text", "")
-        page = request.args.get("page", 1, type=int)
-        per_page = request.args.get("per_page", 10, type=int)
-
-        search = SearchDTO(query_text, page, per_page)
-
-        try:
-            return SearchController().search_transcriptions(search=search)
-        except Exception as e:
-            return Response(
-                response=str(e),
-                status=500,
-                mimetype="application/json",
-            )
-
     @app.route(
-        "/v1/search_by_video",
+        "/v1/search",
         methods=["GET"],
-        endpoint="search_transcriptions_by_video",
+        endpoint="search",
     )
     @requires_auth
     @requires_payment
-    def search_transcriptions_by_video():
+    def search():
         query_text = request.args.get("text", "")
         page = request.args.get("page", 1, type=int)
         per_page = request.args.get("per_page", 10, type=int)
+        stringfied_order_by = request.args.get(
+            "order_by", OrderByOptions.PUBLISH_DATE_ASC, type=str
+        )
+        order_by = sanitize_and_convert_order_by(stringfied_order_by)
 
-        search = SearchDTO(query_text, page, per_page)
+        search = SearchDTO(query_text, page, per_page, order_by)
 
         try:
             # Decoding JWT token and retrieving email attribute
