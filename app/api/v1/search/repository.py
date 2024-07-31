@@ -26,4 +26,5 @@ class SearchRepository:
         return self.db.videoTranscriptions.count_documents(query)
 
     def aggregate_transcriptions(self, pipeline):
-        return list(self.db.videoTranscriptions.aggregate(pipeline))[0]
+        result = list(self.db.videoTranscriptions.aggregate(pipeline))
+        return result[0] if result else []
