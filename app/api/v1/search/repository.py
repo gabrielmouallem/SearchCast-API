@@ -27,4 +27,4 @@ class SearchRepository:
 
     def aggregate_transcriptions(self, pipeline):
         result = list(self.db.videoTranscriptions.aggregate(pipeline))
-        return result[0] if result else []
+        return result[0] if result else {}
