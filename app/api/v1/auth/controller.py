@@ -16,7 +16,7 @@ EXPIRATION_TIME = 30 * 60
 
 flask_env = os.environ.get("FLASK_ENV")
 
-FRONTEND_URL = f"{os.environ.get("FRONTEND_URL")}/password-reset"
+FRONTEND_URL = f'{os.environ.get("FRONTEND_URL")}/password-reset'
 
 
 def generate_reset_password_email(token):
