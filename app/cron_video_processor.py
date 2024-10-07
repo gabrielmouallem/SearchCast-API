@@ -21,6 +21,14 @@ playlist_urls = [
     "https://www.youtube.com/watch?v=9JyRGOiBt0o&list=PL2LH9u21t_RQC1viFOKJOvUa9aPwi9Aez",
     "https://www.youtube.com/watch?v=n-53I1tfnIw&list=PLczDDIRnclWRAi9rLUxxUHz2j7XSEothf",
     "https://www.youtube.com/watch?v=1oEaEB0j3bc&list=PLap7g1BFssvl6xYS8OyNk4JvJBMUeEKfo",
+    # New URLs
+    "https://www.youtube.com/watch?v=_yp18pX_3NQ&list=PLWieWKZeFoVQBl5jPTEvWUah6-FTufaKi&pp=iAQB",
+    "https://www.youtube.com/watch?v=NxlFkOCwlaw&list=PLV-b4RRsU-VYG_8VTZAmoETlHwd1s9LHg",
+    "https://www.youtube.com/watch?v=RYexfrU07B8&list=PLV-b4RRsU-VbpgVwNbXEm_961lSwZii7j",
+    "https://www.youtube.com/watch?v=rnZn62458Dc&list=PLk_e6laOs_lRUrOG0x9Ba5S5QsVdVqb2J&pp=iAQB",
+    "https://www.youtube.com/watch?v=jhSeRasb1Lw&list=PLlHCt9SnkpCjUzX-cFQLuo6MI6-eSxFOw",
+    "https://www.youtube.com/watch?v=wWCr2p0PIh4&list=PLW3mXBgY1SKXqrcDlApx2Xntuyl_J1zpe",
+    "https://www.youtube.com/watch?v=SQsI_KtC3JE&list=PLtyaItn7iHcuwMma-Frjq28JsPVklxPBp",
 ]
 
 
